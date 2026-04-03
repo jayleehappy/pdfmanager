@@ -26,6 +26,7 @@ from src.core.directory_scanner import scan_directory
 from src.core.tree_manager import TreeManager
 from src.core.pdf_merger import merge_pdfs, PDFMerger
 from src.core.pdf_splitter import split_pdf
+from src.core.pdf_page_splitter import split_pdf_to_single_pages
 from src.core.xml_handler import export_to_xml, import_from_xml, validate_xml, XMLHandler, items_to_tree_items
 from src.ui.tree_widget import TreeWidget
 from src.ui.preview_widget import PreviewWidget
@@ -121,6 +122,12 @@ class ToolbarFrame(QFrame):
         self.btn_split.setStyleSheet(button_style)
         self.btn_split.setMinimumWidth(100)
         layout.addWidget(self.btn_split)
+
+        # 拆分单页 PDF 按钮
+        self.btn_split_pages = QPushButton("📑 拆分单页")
+        self.btn_split_pages.setStyleSheet(button_style)
+        self.btn_split_pages.setMinimumWidth(100)
+        layout.addWidget(self.btn_split_pages)
 
         # 排序管理按钮
         self.btn_sort = QPushButton("⚙ 排序管理")
@@ -245,6 +252,7 @@ class MainWindow(QMainWindow):
         self.toolbar.btn_export.clicked.connect(self._on_export_xml)
         self.toolbar.btn_merge.clicked.connect(self._on_merge_pdf)
         self.toolbar.btn_split.clicked.connect(self._on_split_pdf)
+        self.toolbar.btn_split_pages.clicked.connect(self._on_split_pages)
         self.toolbar.btn_sort.clicked.connect(self._on_sort_management)
 
         # 树形组件信号
@@ -581,6 +589,61 @@ class MainWindow(QMainWindow):
 
         if success:
             ConfirmDialog.info(self, "拆分成功", f"PDF 已按书签拆分为多个文件\n保存在：\n{output_dir}")
+            self.statusBar.showMessage(f"PDF 拆分完成：{output_dir}")
+        else:
+            ConfirmDialog.error(self, "拆分失败", "拆分 PDF 时出错，请查看控制台日志")
+
+    def _on_split_pages(self) -> None:
+        """拆分单页 PDF - 将多页 PDF 拆分为多个单页 PDF"""
+        # 选择要拆分的 PDF 文件
+        input_path = FileOpenDialog.open_pdf(self, str(DEFAULT_OUTPUT_DIR))
+        if not input_path:
+            return
+
+        # 选择输出目录
+        output_dir = DirectorySelectionDialog.select_directory(self, str(DEFAULT_OUTPUT_DIR))
+        if not output_dir:
+            return
+
+        # 获取总页数用于进度
+        try:
+            from pypdf import PdfReader
+            reader = PdfReader(input_path)
+            total_pages = len(reader.pages)
+            if total_pages == 0:
+                ConfirmDialog.warning(self, "提示", "PDF 文件没有页面")
+                return
+        except Exception as e:
+            ConfirmDialog.error(self, "错误", f"无法读取 PDF 文件：{e}")
+            return
+
+        # 显示进度对话框
+        self.progress_dialog = ProgressDialog(
+            self,
+            "拆分单页 PDF",
+            "正在拆分文件...",
+            total_pages
+        )
+        self.progress_dialog.show()
+
+        # 进度回调
+        def progress_callback(current: int, total: int, message: str):
+            if total > 0:
+                self.progress_dialog.set_value(current)
+            self.progress_dialog.set_label(f"正在处理：{message}")
+            QApplication.processEvents()
+
+        # 执行拆分
+        success = split_pdf_to_single_pages(input_path, output_dir, progress_callback)
+
+        # 关闭进度对话框
+        self.progress_dialog.close()
+
+        if success:
+            ConfirmDialog.info(
+                self, "拆分成功",
+                f"PDF 已拆分为 {total_pages} 个单页文件\n保存在：\n{output_dir}"
+            )
             self.statusBar.showMessage(f"PDF 拆分完成：{output_dir}")
         else:
             ConfirmDialog.error(self, "拆分失败", "拆分 PDF 时出错，请查看控制台日志")
