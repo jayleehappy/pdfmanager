@@ -17,9 +17,9 @@ DEFAULT_OUTPUT_DIR = BASE_DIR / "output"
 APP_TITLE = "PDF 名册管理生成工具"
 
 # 版本信息
-APP_VERSION = "1.6"
+APP_VERSION = "1.7"
 APP_AUTHOR = "李中杰"
-APP_DATE = "2026.4.3"
+APP_DATE = "2026.4.4"
 
 # 窗口大小
 WINDOW_WIDTH = 1400
