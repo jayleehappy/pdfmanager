@@ -109,7 +109,7 @@ class PDFPageSplitter:
                     # 遇到中文表头词就停止
                     if self._is_header_word(word):
                         break
-                    # 跳过英文字段名（如 xingming, xingbie, minzu）
+                    # 跳过英文字段名
                     if self._is_english_field(word):
                         j += 1
                         continue
@@ -117,8 +117,13 @@ class PDFPageSplitter:
                     j += 1
 
                 if name_parts:
-                    # 合并姓名部分
+                    # 合并姓名部分（保留空格和·符号）
                     name = ''.join(name_parts)
+                    # 清理多余的空格但保留·符号
+                    name = ' '.join(name.split())  # 规范化空格
+                    if '·' in name:
+                        # 保留·符号格式
+                        name = name.replace(' ', '')  # 有·时去掉空格
                     if len(name) >= 1:
                         return name
                 break
