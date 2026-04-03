@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pdf-outline version="1.0">
+  <outline-item title="0-名册" path="" is-dir="false"/>
+  <outline-item title="一-机关部门以上领导" path="" is-dir="true">
+    <outline-item title="01-张三" path="" is-dir="false"/>
+    <outline-item title="02-李四" path="" is-dir="false"/>
+    <outline-item title="03-王五" path="" is-dir="false"/>
+  </outline-item>
+  <outline-item title="2-cmb机关" path="" is-dir="true">
+    <outline-item title="01办公室" path="" is-dir="true">
+      <outline-item title="01-张三三" path="" is-dir="false"/>
+      <outline-item title="02-李四四" path="" is-dir="false"/>
+      <outline-item title="03-王五五" path="" is-dir="false"/>
+    </outline-item>
+    <outline-item title="02信息处" path="" is-dir="true">
+      <outline-item title="01-张三三三" path="" is-dir="false"/>
+      <outline-item title="02-李四四四" path="" is-dir="false"/>
+      <outline-item title="03-王五五五" path="" is-dir="false"/>
+      <outline-item title="04-王五五五1" path="" is-dir="false"/>
+    </outline-item>
+  </outline-item>
+  <outline-item title="3-zzb机关" path="" is-dir="true">
+    <outline-item title="01-副主任1" path="" is-dir="false"/>
+    <outline-item title="01办公室" path="" is-dir="true">
+      <outline-item title="01-张三三1" path="" is-dir="false"/>
+      <outline-item title="02-李四四1" path="" is-dir="false"/>
+      <outline-item title="03-王五五1" path="" is-dir="false"/>
+    </outline-item>
+    <outline-item title="02信息处" path="" is-dir="true">
+      <outline-item title="01-张三三三" path="" is-dir="false"/>
+      <outline-item title="02-李四四四" path="" is-dir="false"/>
+      <outline-item title="03-王五五五" path="" is-dir="false"/>
+    </outline-item>
+  </outline-item>
+</pdf-outline>
