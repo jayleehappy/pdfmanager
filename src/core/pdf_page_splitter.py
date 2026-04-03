@@ -101,16 +101,16 @@ class PDFPageSplitter:
         # 找到"姓"+"名"的组合
         for i in range(len(words) - 1):
             if words[i] == '姓' and words[i + 1] == '名':
-                # "姓名"后面是姓名值，一直取到表头词为止
+                # "姓名"后面是姓名值，收集直到遇到中文表头词
                 name_parts = []
                 j = i + 2
                 while j < len(words):
                     word = words[j]
-                    # 如果遇到表头词就停止
+                    # 遇到中文表头词就停止
                     if self._is_header_word(word):
                         break
-                    # 跳过英文字段名（如 xingming）
-                    if re.match(r'^[a-z]+$', word) and len(word) > 2:
+                    # 跳过英文字段名（如 xingming, xingbie, minzu）
+                    if self._is_english_field(word):
                         j += 1
                         continue
                     name_parts.append(word)
@@ -119,10 +119,6 @@ class PDFPageSplitter:
                 if name_parts:
                     # 合并姓名部分
                     name = ''.join(name_parts)
-                    # 检查是否是纯英文字段名（如 xingming）
-                    if re.match(r'^[a-zA-Z]+$', name) and len(name) > 1:
-                        # 纯英文的视为空姓名
-                        return None
                     if len(name) >= 1:
                         return name
                 break
@@ -130,17 +126,25 @@ class PDFPageSplitter:
         return None
 
     def _is_header_word(self, word: str) -> bool:
-        """检查是否为表头词"""
+        """检查是否为中文表头词"""
         header_set = {
             '性别', '民族', '出生', '政治', '学历', '学位',
             '籍贯', '入党', '入伍', '参加', '工作', '职务', '岗位',
             '简历', '主要', '家庭', '奖惩', '培训', '证书', '职位',
             '时间', '单位', '学习', '担任', '现', '曾', '在', '至',
-            'minzu', 'xingbie', 'chushen', 'gangweizhiwu', 'xueli',
-            'ruwugong', 'zhiwu', 'rudang', 'gongzuo', 'jianli',
-            '入党时间', '简历表', '个人简历'
+            '简历表', '个人简历'
         }
         return word in header_set
+
+    def _is_english_field(self, word: str) -> bool:
+        """检查是否为英文字段名"""
+        # 已知的英文字段名
+        fields = {
+            'xingbie', 'chushen', 'minzu', 'gangweizhiwu',
+            'xueli', 'xuewei', 'ruwugong', 'zhiwu', 'rudang', 'gongzuo',
+            'jianli', 'zhiwucengjiji', 'junxianjishijian'
+        }
+        return word.lower() in fields
 
     def _sanitize_filename(self, filename: str) -> str:
         """生成安全的文件名"""
