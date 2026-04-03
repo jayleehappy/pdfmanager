@@ -119,6 +119,10 @@ class PDFPageSplitter:
                 if name_parts:
                     # 合并姓名部分
                     name = ''.join(name_parts)
+                    # 检查是否是纯英文字段名（如 xingming）
+                    if re.match(r'^[a-zA-Z]+$', name) and len(name) > 1:
+                        # 纯英文的视为空姓名
+                        return None
                     if len(name) >= 1:
                         return name
                 break
