@@ -83,6 +83,12 @@ class PDFPageSplitter:
                 progress_callback(0, 0, f"错误: {e}")
             return False
 
+    def _split_text(self, text: str) -> list:
+        """按空格分割文本，支持半角和全角空格"""
+        # 先统一全角空格为半角
+        text = text.replace('\u3000', ' ')
+        return text.split()
+
     def _extract_name_from_resume(self, page) -> Optional[str]:
         """
         从简历表页面提取姓名
@@ -95,8 +101,8 @@ class PDFPageSplitter:
         # 清理文本
         text = text.replace('\x00', '')
 
-        # 按空格分割词
-        words = text.split()
+        # 按空格分割词（支持全角空格）
+        words = self._split_text(text)
 
         # 找到"姓"+"名"的组合
         for i in range(len(words) - 1):
@@ -117,13 +123,14 @@ class PDFPageSplitter:
                     j += 1
 
                 if name_parts:
-                    # 合并姓名部分（保留空格和·符号）
+                    # 合并姓名部分
                     name = ''.join(name_parts)
-                    # 清理多余的空格但保留·符号
+                    # 清理空格（全角和半角）但保留·符号
+                    name = name.replace('\u3000', ' ')  # 全角空格转半角
                     name = ' '.join(name.split())  # 规范化空格
                     if '·' in name:
-                        # 保留·符号格式
-                        name = name.replace(' ', '')  # 有·时去掉空格
+                        # 保留·符号格式时去掉空格
+                        name = name.replace(' ', '')
                     if len(name) >= 1:
                         return name
                 break
