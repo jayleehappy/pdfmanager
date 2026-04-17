@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报告表 OCR 识别与比对系统</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+    <style>
+        /* ── Apple风格基础 ─────────────────────────────── */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #f5f5f7;
+            --card: #ffffff;
+            --border: #d2d2d7;
+            --text: #1d1d1f;
+            --text2: #86868b;
+            --blue: #0071e3;
+            --blue2: #007aff;
+            --gray1: #f5f5f7;
+            --gray2: #e8e8ed;
+            --gray3: #d2d2d7;
+            --radius: 12px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.06);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+            line-height: 1.5;
+            color: var(--text);
+            background: var(--bg);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: var(--blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* ── 顶部导航 ─────────────────────────────────── */
+        .topbar {
+            background: rgba(255,255,255,0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 40px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-brand {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
+        .topbar-sub { font-size: 12px; color: var(--text2); font-weight: 400; }
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 12px; border-radius: 20px;
+            background: var(--gray1); font-size: 12px; color: var(--text2);
+        }
+        .status-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #ff3b30; }
+        .status-pill .dot.ok { background: #34c759; }
+
+        /* ── 主容器 ──────────────────────────────────── */
+        .main { max-width: 1280px; margin: 0 auto; padding: 24px 40px 60px; }
+
+        /* ── 标签页 ──────────────────────────────────── */
+        .seg-control {
+            display: inline-flex;
+            background: var(--gray2);
+            border-radius: 10px;
+            padding: 3px;
+            margin-bottom: 20px;
+        }
+        .seg-btn {
+            padding: 6px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text2);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .seg-btn.active {
+            background: white;
+            color: var(--text);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        /* ── 卡片 ────────────────────────────────────── */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.04);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .card-head {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--gray2);
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 14px; font-weight: 600;
+        }
+        .card-body { padding: 16px 20px; }
+
+        /* ── 双栏布局 ────────────────────────────────── */
+        .two-col {
+            display: flex;
+            width: 100%;
+            gap: 16px;
+            max-height: 760px;
+            min-height: 0;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        .two-col > .pdf-panel {
+            flex: 0 0 50%;
+            width: 50%;
+            max-width: 50%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+        @media (max-width: 900px) { .two-col { flex-direction: column; } .two-col > .pdf-panel { width: 100%; max-width: 100%; } }
+
+        /* ── PDF预览面板 ─────────────────────────────── */
+        .pdf-panel {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: var(--gray1);
+            max-height: 760px;
+        }
+        .pdf-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px;
+            background: white;
+            border-bottom: 1px solid var(--gray2);
+            font-size: 13px; font-weight: 600; color: var(--text2);
+        }
+        .pdf-head .tag {
+            font-size: 11px; padding: 2px 8px; border-radius: 10px;
+            background: var(--blue2); color: white; font-weight: 500;
+        }
+        .pdf-bar {
+            display: flex; gap: 5px; padding: 8px 12px;
+            background: white; border-bottom: 1px solid var(--gray2);
+            align-items: center; flex-wrap: wrap;
+        }
+        .pdf-bar button {
+            padding: 5px 11px; border: 1px solid var(--gray3);
+            background: white; border-radius: 8px;
+            cursor: pointer; font-size: 13px;
+            color: var(--text);
+            transition: all 0.15s;
+        }
+        .pdf-bar button:hover { border-color: var(--blue); color: var(--blue); }
+        .pdf-bar select {
+            padding: 5px 8px; border: 1px solid var(--gray3);
+            border-radius: 8px; font-size: 13px; background: white;
+        }
+        .pdf-bar .info { margin-left: auto; font-size: 12px; color: var(--text2); }
+        .pdf-viewport {
+            flex: 1; overflow: auto; position: relative;
+            display: flex; justify-content: center; align-items: flex-start;
+            padding: 16px; width: 100%;
+            max-height: 660px; box-sizing: border-box;
+        }
+        .pdf-viewport canvas { max-width: 100%; max-height: 100%; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .ocr-overlay-viewport {
+            flex: 1;
+            display: flex; justify-content: center;
+            align-items: flex-start; padding: 12px;
+            overflow: hidden;
+            max-height: 660px;
+            background: #e8e8e8;
+            box-sizing: border-box;
+        }
+        .pdf-viewport {
+            flex: 1; position: relative;
+            display: flex; justify-content: center; align-items: flex-start;
+            padding: 16px;
+            overflow: auto;
+            max-height: 660px; box-sizing: border-box;
+        }
+        .text-layer .ocr-text {
+            position: absolute; font-size: 14px; font-weight: 600;
+            color: var(--blue2); -webkit-text-stroke: 0.4px rgba(0,71,170,0.5);
+            text-shadow: 0 1px 3px rgba(0,71,170,0.2);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .text-layer .ocr-input {
+            position: absolute; font-size: 14px; font-weight: 500;
+            color: var(--blue2);
+            background: rgba(0,122,255,0.08);
+            border: 1px solid rgba(0,122,255,0.3);
+            border-radius: 3px;
+            padding: 1px 3px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            cursor: text;
+        }
+
+        /* ── 上传占位（撑满整个panel）── */
+        .upload-fill {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            flex: 1; min-height: 420px;
+            border: 2px dashed var(--gray3);
+            border-radius: var(--radius);
+            cursor: pointer; transition: all 0.2s;
+            color: var(--text2); margin: 16px;
+        }
+        .upload-fill:hover { border-color: var(--blue); background: rgba(0,122,255,0.03); color: var(--blue); }
+        .upload-fill .icon { font-size: 52px; margin-bottom: 10px; }
+        .upload-fill .hint { font-size: 14px; font-weight: 500; }
+        .upload-fill .sub { font-size: 12px; margin-top: 4px; }
+
+        /* ── 进度条 ──────────────────────────────────── */
+        .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .progress-track { flex: 1; height: 5px; background: var(--gray2); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--blue2); transition: width 0.4s; border-radius: 3px; }
+        .progress-num { font-size: 12px; color: var(--text2); min-width: 36px; text-align: right; }
+
+        /* ── 日志区 ──────────────────────────────────── */
+        .log-box {
+            background: #1c1c1e; border-radius: 10px;
+            padding: 10px 14px; max-height: 140px; overflow-y: auto;
+            font-family: "SF Mono", "Menlo", "Consolas", monospace;
+            font-size: 11.5px; line-height: 1.6;
+        }
+        .log-line { color: #a1a1a6; }
+        .log-line.i { color: #64d2ff; }
+        .log-line.w { color: #ffd60a; }
+        .log-line.e { color: #ff453a; }
+        .log-line.s { color: #30d158; }
+
+        /* ── 按钮 ────────────────────────────────────── */
+        .btn {
+            padding: 9px 22px; border: none; border-radius: 10px;
+            cursor: pointer; font-size: 14px; font-weight: 500;
+            transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-blue { background: var(--blue2); color: white; }
+        .btn-blue:hover { background: #005bb5; }
+        .btn-blue:disabled { opacity: 0.45; cursor: not-allowed; }
+        .btn-gray { background: var(--gray2); color: var(--text); }
+        .btn-gray:hover { background: var(--gray3); }
+        .action-row { display: flex; gap: 10px; justify-content: center; margin: 14px 0; }
+
+        /* ── 统计卡片 ────────────────────────────────── */
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+        @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+        .stat {
+            text-align: center; padding: 16px 8px;
+            border-radius: 12px; background: var(--gray1);
+        }
+        .stat .n { font-size: 30px; font-weight: 700; color: var(--blue2); line-height: 1; }
+        .stat .l { font-size: 12px; color: var(--text2); margin-top: 4px; }
+        .stat.d .n { color: #ff3b30; }
+        .stat.w .n { color: #ff9f0a; }
+        .stat.g .n { color: #30d158; }
+
+        /* ── 表格 ────────────────────────────────────── */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--gray2); }
+        th { background: var(--gray1); font-weight: 600; color: var(--text2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+        tr:hover td { background: #f0f0f5; }
+        .diff-row td { background: #fff5f5 !important; }
+        .diff-row.warn td { background: #fffbf0 !important; }
+        .badge { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+        .badge-ok { background: #d1f7d1; color: #1a7a1a; }
+        .badge-err { background: #ffd1d1; color: #c0392b; }
+        .badge-warn { background: #fff0d1; color: #8b5a00; }
+
+        /* ── OCR结果可编辑表格 ───────────────────────── */
+        .ocr-table { width: 100%; border-collapse: collapse; }
+        .ocr-table th { background: var(--gray1); font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .ocr-table td { padding: 5px 8px; }
+        .ocr-table .fname { color: var(--blue2); font-weight: 500; font-size: 12px; }
+        .ocr-table .fval { color: var(--text); font-size: 13px; }
+        .ocr-table .fedit {
+            width: 100%; border: 1px solid var(--gray3); border-radius: 6px;
+            padding: 3px 7px; font-size: 13px; color: var(--text);
+            background: #fffbe6;
+        }
+        .ocr-table .fedit:focus { outline: none; border-color: var(--blue); background: white; }
+
+        /* ── 历史记录 ────────────────────────────────── */
+        .sub-seg {
+            display: flex; gap: 4px; margin-bottom: 14px;
+            border-bottom: 1px solid var(--gray2); padding-bottom: 0;
+        }
+        .sub-btn {
+            padding: 6px 14px; border: none; background: transparent;
+            color: var(--text2); font-size: 13px; cursor: pointer;
+            border-bottom: 2px solid transparent; margin-bottom: -1px;
+        }
+        .sub-btn.active { color: var(--blue2); border-bottom-color: var(--blue2); font-weight: 600; }
+
+        /* ── Toast ───────────────────────────────────── */
+        .toast {
+            position: fixed; bottom: 24px; right: 24px;
+            padding: 12px 20px; border-radius: 12px; font-size: 14px;
+            z-index: 9999; animation: toastIn 0.25s ease;
+            color: white; font-weight: 500;
+        }
+        .toast.ok { background: #30d158; }
+        .toast.err { background: #ff3b30; }
+        @keyframes toastIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+        /* ── 抽屉 ────────────────────────────────────── */
+        .drawer-wrap { position:fixed; inset:0; z-index:1000; display:none; align-items:flex-start; justify-content:flex-end; }
+        .drawer-wrap.show { display:flex; }
+        .drawer-mask { position:absolute; inset:0; background:rgba(0,0,0,0.3); }
+        .drawer {
+            position:relative; width:560px; max-width:95vw; height:100vh; background:white;
+            overflow-y:auto; padding:24px; box-shadow:-4px 0 24px rgba(0,0,0,0.12);
+            animation: drawerIn 0.22s ease;
+        }
+        @keyframes drawerIn { from{transform:translateX(100%)}to{transform:translateX(0)} }
+        .drawer-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; padding-bottom:14px; border-bottom:2px solid var(--gray2); }
+        .drawer-hd h3 { font-size:16px; }
+        .drawer-close { background:none; border:none; font-size:24px; cursor:pointer; color:var(--text2); }
+
+        /* ── 空状态 ──────────────────────────────────── */
+        .empty { text-align:center; padding:40px 16px; color:var(--text2); }
+        .empty .i { font-size:44px; margin-bottom:8px; }
+        .empty p { font-size:14px; }
+
+        /* ── 隐藏 ───────────────────────────────────── */
+        .hide { display:none !important; }
+
+        /* ── 小按钮 ──────────────────────────────────── */
+        .btn-sm { padding:4px 12px; font-size:12px; border-radius:8px; }
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="topbar">
+    <div>
+        <div class="topbar-brand">报告表 OCR 识别与比对系统</div>
+        <div class="topbar-sub">领导干部个人有关事项报告表 · 查核反馈比对</div>
+    </div>
+    <div class="status-pill" id="statusPill">
+        <div class="dot" id="statusDot"></div>
+        <span id="statusText">检测服务...</span>
+    </div>
+</div>
+
+<div class="main">
+    <!-- 标签页切换 -->
+    <div class="seg-control">
+        <button class="seg-btn active" id="seg-new" onclick="switchSeg('new')">新任务</button>
+        <button class="seg-btn" id="seg-hist" onclick="switchSeg('hist')">历史记录</button>
+    </div>
+
+    <!-- ══════════════ 新任务 ══════════════ -->
+    <div id="pane-new">
+
+        <!-- 1. PDF预览区 -->
+        <div class="card">
+            <div class="card-head">
+                📄 文档预览
+                <span id="scanFileName" style="font-weight:400;font-size:12px;color:var(--text2)"></span>
+            </div>
+            <div class="card-body" style="padding:12px 16px">
+                <div class="two-col">
+                    <!-- 扫描件 -->
+                    <div class="pdf-panel" id="scanPanel">
+                        <div class="pdf-head">
+                            <span>📤 扫描件预览</span>
+                            <span class="tag" id="scanTag"></span>
+                        </div>
+                        <div class="pdf-bar hide" id="scanBar">
+                            <button onclick="vwScan.prev()">◀</button>
+                            <button onclick="vwScan.next()">▶</button>
+                            <select onchange="vwScan.setZoom(this.value)">
+                                <option value="0.5">50%</option>
+                                <option value="0.75">75%</option>
+                                <option value="1" selected>100%</option>
+                                <option value="1.25">125%</option>
+                                <option value="1.5">150%</option>
+                                <option value="2">200%</option>
+                            </select>
+                            <button onclick="vwScan.rotate(-90)">↺</button>
+                            <button onclick="vwScan.rotate(90)">↻</button>
+                            <span class="info" id="scanInfo"></span>
+                        </div>
+                        <div class="pdf-viewport" id="scanViewport">
+                            <div class="upload-fill" id="scanUpload" onclick="document.getElementById('finScan').click()">
+                                <div class="icon">📄</div>
+                                <div class="hint">点击上传扫描件 PDF</div>
+                                <div class="sub">支持 PDF / PNG / JPG</div>
+                            </div>
+                            <input type="file" id="finScan" class="hide" accept=".pdf,.png,.jpg,.jpeg" onchange="handleScan(this.files[0])">
+                            <canvas id="cvsScan" class="hide"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 识别结果 -->
+                    <div class="pdf-panel" id="resPanel">
+                        <div class="pdf-head">
+                            <span>📊 识别结果</span>
+                            <span class="tag" id="resTag">模板预览</span>
+                        </div>
+                        <div class="pdf-bar">
+                            <button onclick="navigateResult(-1)">◀</button>
+                            <button onclick="navigateResult(1)">▶</button>
+                            <span class="info" id="resInfo">—</span>
+                        </div>
+                        <!-- 模板图片 + OCR区域叠加 -->
+                        <div class="ocr-overlay-viewport" id="resViewport">
+                            <div id="ocrPageContainer" style="position:relative;max-width:100%">
+                                <img id="tplImg" src="" style="display:block">
+                                <div id="ocrRegionLayer" style="position:absolute;top:0;left:0;pointer-events:none"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 进度与日志 -->
+        <div class="card">
+            <div class="card-head">🔍 识别进度</div>
+            <div class="card-body">
+                <div class="progress-row">
+                    <div class="progress-track"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+                    <div class="progress-num" id="progNum">0%</div>
+                </div>
+                <div class="log-box" id="logBox"><div class="log-line">等待开始识别...</div></div>
+            </div>
+        </div>
+
+        <!-- 3. 按钮 -->
+        <div class="action-row">
+            <button class="btn btn-blue" id="btnOcr" onclick="startOCR()" disabled>🔍 开始 OCR 识别</button>
+            <button class="btn btn-blue" id="btnComp" onclick="startCompare()" disabled>⚖️ 执行比对分析</button>
+            <button class="btn btn-gray" onclick="resetAll()">🔄 重置</button>
+        </div>
+
+        <!-- 4. 数据比对区 -->
+        <div class="card">
+            <div class="card-head">⚖️ 数据比对</div>
+            <div class="card-body">
+                <div class="two-col">
+                    <!-- 反馈上传 -->
+                    <div class="pdf-panel" style="min-height:240px">
+                        <div class="pdf-head">📊 上传反馈信息（Excel）</div>
+                        <div id="feedbackBody" style="padding:16px;flex:1">
+                            <div class="upload-fill" style="min-height:180px;margin:0" onclick="document.getElementById('finFb').click()">
+                                <div class="icon">📊</div>
+                                <div class="hint">点击上传反馈 Excel</div>
+                                <div class="sub">支持 .xlsx / .xls</div>
+                            </div>
+                            <input type="file" id="finFb" class="hide" accept=".xlsx,.xls" onchange="handleFeedback(this.files[0])">
+                        </div>
+                    </div>
+                    <!-- OCR结果（可编辑） -->
+                    <div class="pdf-panel" style="min-height:240px">
+                        <div class="pdf-head" style="flex-wrap:wrap;gap:6px">
+                            <span>📋 OCR 识别结果</span>
+                            <div style="display:flex;gap:6px;align-items:center;margin-left:auto">
+                                <span id="editBadge" style="font-size:11px;color:#ff9f0a;display:none">已修改 ●</span>
+                                <button class="btn btn-blue btn-sm" id="btnSaveEdit" onclick="saveEdited()" style="display:none;padding:4px 12px;font-size:12px">💾 保存修改</button>
+                            </div>
+                        <div id="ocrBody" style="padding:12px;max-height:320px;overflow:auto;flex:1">
+                            <div class="empty"><div class="i">🔍</div><p>请先执行 OCR 识别</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 比对报告 -->
+        <div class="card hide" id="reportCard">
+            <div class="card-head">📊 比对结果</div>
+            <div class="card-body">
+                <div class="stats">
+                    <div class="stat"><div class="n" id="sTot">0</div><div class="l">比对总数</div></div>
+                    <div class="stat g"><div class="n" id="sOk">0</div><div class="l">一致</div></div>
+                    <div class="stat d"><div class="n" id="sBad">0</div><div class="l">不一致</div></div>
+                    <div class="stat w"><div class="n" id="sMis">0</div><div class="l">缺失</div></div>
+                </div>
+                <div style="margin-bottom:10px">
+                    <button class="btn btn-gray btn-sm" onclick="viewReport()">📄 完整报告</button>
+                    <button class="btn btn-gray btn-sm" onclick="exportReport()">📥 导出 PDF</button>
+                </div>
+                <div id="diffList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ 历史记录 ══════════════ -->
+    <div id="pane-hist" class="hide">
+        <div class="sub-seg">
+            <button class="sub-btn active" id="sub-ocr" onclick="switchSub('ocr')">OCR 任务</button>
+            <button class="sub-btn" id="sub-fb" onclick="switchSub('fb')">反馈文件</button>
+            <button class="sub-btn" id="sub-cmp" onclick="switchSub('cmp')">比对结果</button>
+        </div>
+        <div id="p-sub-ocr"><div id="t-ocr"></div></div>
+        <div id="p-sub-fb" class="hide"><div id="t-fb"></div></div>
+        <div id="p-sub-cmp" class="hide"><div id="t-cmp"></div></div>
+    </div>
+</div>
+
+<!-- 抽屉 -->
+<div class="drawer-wrap" id="drawer">
+    <div class="drawer-mask" onclick="closeDrawer()"></div>
+    <div class="drawer"><div id="drawerIn"></div></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// 全局状态
+// ═══════════════════════════════════════════
+// ════════════════════════
+// 全局状态
+// ════════════════════════
+const $ = id => document.getElementById(id);
+const S = {
+    scanId: null, scanName: null, scanDoc: null,
+    fbId: null, fbName: null,
+    ocrTask: null, ocrFile: null, ocrData: null, ocrEdited: {},
+    cmpId: null, cmpData: null,
+    logs: [],
+    logTimer: null,
+    resultPage: 1,
+    totalTplPages: 21,
+};
+
+// ════════════════════════
+// PDF查看器（仅扫描件）
+// ═════════════════════════
+class PDFView {
+    constructor(cid) {
+        this.c = $(cid);
+        this.ctx = this.c.getContext('2d');
+        this.doc = null; this.page = 1; this.total = 0;
+        this.scale = 1; this.rot = 0; this.task = null;
+        this.pageW = 0; this.pageH = 0;
+        this._onPageChange = null;
+        this._autoFit = true;  // 自动适应视口
+    }
+    async load(url) {
+        try {
+            const t = pdfjsLib.getDocument(url);
+            this.doc = await t.promise;
+            this.total = this.doc.numPages;
+            this.page = 1; this.scale = 1; this._autoFit = true;
+            await this._doRender(1);
+            return true;
+        } catch(e) { console.error('PDF\u52a0\u8f7d\u5931\u8d25', e); return false; }
+    }
+    async _doRender(pg) {
+        if (!this.doc) return;
+        pg = Math.max(1, Math.min(pg, this.total));
+        this.page = pg;
+        if (this.task) this.task.cancel();
+        try {
+            const page = await this.doc.getPage(pg);
+            // 自动适应：按视口max-height限制scale
+            var renderScale = this.scale;
+            if (this._autoFit) {
+                var vpRaw = page.getViewport({ scale: 1, rotation: this.rot });
+                var vpW = $('scanViewport');
+                var maxH = (vpW ? vpW.clientHeight : 600) - 40;  // 减去padding
+                var maxW = (vpW ? vpW.clientWidth : 600) - 40;
+                renderScale = Math.min(maxW / vpRaw.width, maxH / vpRaw.height, 1.5);
+            }
+            const vp = page.getViewport({ scale: renderScale, rotation: this.rot });
+            this.pageW = vp.width; this.pageH = vp.height;
+            this.c.width = this.pageW; this.c.height = this.pageH;
+            this.task = page.render({ canvasContext: this.ctx, viewport: vp });
+            await this.task.promise;
+            if (this._onPageChange) this._onPageChange(pg, this);
+        } catch(e) { if (e.name !== 'RenderingCancelledException') console.error(e); }
+    }
+    prev() { this._doRender(this.page - 1); }
+    next() { this._doRender(this.page + 1); }
+    setZoom(v) {
+        this.scale = parseFloat(v);
+        this._autoFit = false;  // 用户手动缩放后关闭自动
+        this._doRender(this.page);
+    }
+    rotate(d) { this.rot = (this.rot + d) % 360; this._autoFit = false; this._doRender(this.page); }
+    goTo(pg) { this._doRender(pg); }
+}
+
+const vwScan = new PDFView('cvsScan');
+
+// ════════════════════════
+// 模板图片 + OCR区域叠加（核心新方案）
+// PNG图片尺寸：1241×1754 px，与OCR bbox坐标单1:1匹配，无需比例换算
+// ═════════════════════════
+
+function navigateResult(delta) {
+    const next = S.resultPage + delta;
+    if (next < 1 || next > S.totalTplPages) return;
+    S.resultPage = next;
+    loadTplPage(S.resultPage);
+}
+
+function loadTplPage(pageNum) {
+    var container = $('ocrPageContainer');
+    var img = $('tplImg');
+    var viewport = $('resViewport');
+
+    // 关键：在加载图片前，先强制设容器宽度 = viewport内容宽（flex分配后的）
+    // 否则 scroll formatting context 会让百分比宽度按内容宽(1241px)计算
+    var vpW = (viewport.getBoundingClientRect().width || 454) - 24; // 减去padding
+    container.style.width = vpW + 'px';
+    img.style.width = '100%';
+    img.style.height = 'auto';
+
+    img.onload = function() {
+        var w = img.naturalWidth || 1241;
+        var renderedW = img.getBoundingClientRect().width;
+        S.tplScale = renderedW / w;
+        $('resInfo').textContent = pageNum + ' / ' + S.totalTplPages;
+        renderOcrRegions(pageNum);
+    };
+    img.onerror = function() {
+        $('tplImg').src = '';
+        $('ocrRegionLayer').innerHTML = '';
+        $('resInfo').textContent = pageNum + ' / ' + S.totalTplPages + ' (无模板图)';
+    };
+    img.src = '/templates/pages/page_' + String(pageNum).padStart(3, '0') + '.png';
+}
+
+function renderOcrRegions(tplPage) {
+    var layer = $('ocrRegionLayer');
+    layer.innerHTML = '';
+    if (!S.ocrData) return;
+    var pageData = null;
+    for (var i = 0; i < S.ocrData.length; i++) {
+        var p = S.ocrData[i];
+        if ((p.matched_template_page || p.template_page || p.page) === tplPage) {
+            pageData = p;
+            break;
+        }
+    }
+    if (!pageData || !pageData.regions) return;
+    var sc = S.tplScale || 1;
+    var img = $("tplImg");
+    var renderedH = img.getBoundingClientRect().height;
+    var renderedW = img.getBoundingClientRect().width;
+    layer.style.width = Math.round(renderedW) + "px";
+    layer.style.height = Math.round(renderedH) + "px";
+    for (var ri = 0; ri < pageData.regions.length; ri++) {
+        var reg = pageData.regions[ri];
+        var label = reg.label || '';
+                if (label.indexOf('特征区域') !== -1 || label.indexOf('公共') !== -1 || label.indexOf('页脚') !== -1) continue;
+        var bbox = reg.bbox || [];
+        if (bbox.length < 4) continue;
+        var x = Math.round(bbox[0] * sc);
+        var y = Math.round(bbox[1] * sc);
+        var w = Math.max(8, Math.round((bbox[2] - bbox[0]) * sc));
+        var h = Math.max(8, Math.round((bbox[3] - bbox[1]) * sc));
+        var texts = reg.ocr_result ? reg.ocr_result.texts : [];
+        var editKey = pageData.page + '_' + reg.region_index;
+        var content = S.ocrEdited[editKey];
+        if (!content) {
+            var parts = [];
+            for (var ti = 0; ti < texts.length; ti++) {
+                var t = (texts[ti].content || '').trim();
+                if (t) parts.push(t);
+            }
+            content = parts.join('；');
+        }
+        if (!content) continue;
+        var div = document.createElement('div');
+        div.style.cssText = [
+            'position:absolute',
+            'left:' + x + 'px',
+            'top:' + y + 'px',
+            'width:' + w + 'px',
+            'height:' + h + 'px',
+            'font-size:' + Math.max(9, Math.min(14, h * 0.55)) + 'px',
+            'font-weight:600',
+            'color:#0066ff',
+            '-webkit-text-stroke:0.4px rgba(0,40,120,0.55)',
+            'white-space:nowrap',
+            'overflow:hidden',
+            'text-overflow:ellipsis',
+            'padding:1px 3px',
+            'pointer-events:none',
+            'user-select:none',
+            'line-height:1.3',
+        ].join(';');
+        div.textContent = content;
+        div.title = content;
+        layer.appendChild(div);
+    }
+}
+
+// 初始化：加载模板第1页
+loadTplPage(1);
+
+// 扫描件翻页 → 同步右侧模板页
+vwScan._onPageChange = function(pg) {
+    $('scanInfo').textContent = pg + ' / ' + this.total;
+    S.resultPage = pg;
+    loadTplPage(pg);
+};// 上传处理
+// ═══════════════════════════════════════════
+async function handleScan(file) {
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+        const r = await fetch('/api/upload/pdf', { method: 'POST', body: fd });
+        const d = await r.json();
+        if (!d.success) { toast(d.detail, 'err'); return; }
+        S.scanId = d.file_id; S.scanName = d.filename;
+        $('scanFileName').textContent = d.filename;
+        $('scanTag').textContent = d.page_count + ' 页';
+
+        // 切换为PDF预览
+        $('scanUpload').classList.add('hide');
+        $('cvsScan').classList.remove('hide');
+        $('scanBar').classList.remove('hide');
+
+        const ok = await vwScan.load('/api/upload/pdf/' + d.file_id);
+        if (ok) {
+            $('scanInfo').textContent = `1 / ${vwScan.total}`;
+            toast('扫描件上传成功', 'ok');
+        } else {
+            toast('PDF预览加载失败', 'err');
+        }
+        updBtns();
+    } catch(e) { toast('上传失败: ' + e.message, 'err'); }
+}
+
+async function handleFeedback(file) {
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+        const r = await fetch('/api/upload/excel', { method: 'POST', body: fd });
+        const d = await r.json();
+        if (!d.success) { toast(d.detail, 'err'); return; }
+        S.fbId = d.file_id; S.fbName = d.filename;
+        $('feedbackBody').innerHTML = `
+            <div style="padding:12px">
+                <div style="font-size:13px;color:var(--text2);margin-bottom:6px">
+                    ✅ 已上传 <strong style="color:var(--text)">${d.filename}</strong>
+                </div>
+                <div style="font-size:12px;color:var(--text2)">${d.sheet_count} 个工作表</div>
+            </div>`;
+        toast('反馈文件上传成功', 'ok');
+        updBtns();
+    } catch(e) { toast('上传失败: ' + e.message, 'err'); }
+}
+
+// ═══════════════════════════════════════════
+// OCR 流程
+// ═══════════════════════════════════════════
+async function startOCR() {
+    if (!S.scanId) return;
+    $('btnOcr').disabled = true;
+    addLog('开始 OCR 识别...', 'i');
+    try {
+        const r = await fetch('/api/ocr/recognize', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ file_id: S.scanId, pages: null })
+        });
+        const d = await r.json();
+        S.ocrTask = d.task_id;
+        addLog('任务已创建: ' + d.task_id.slice(0,8) + '...', 's');
+        pollStatus(d.task_id);
+        pollLogs(d.task_id);
+    } catch(e) {
+        addLog('启动失败: ' + e.message, 'e');
+        $('btnOcr').disabled = false;
+    }
+}
+
+async function pollStatus(tid) {
+    const poll = async () => {
+        try {
+            const r = await fetch('/api/ocr/status/' + tid);
+            const d = await r.json();
+            const pct = d.progress || 0;
+            $('progFill').style.width = pct + '%';
+            $('progNum').textContent = pct + '%';
+            if (d.status === 'completed') {
+                addLog('OCR 识别完成！', 's');
+                S.ocrFile = d.result_file;
+                await loadOcrResult(tid);
+                $('btnOcr').disabled = false;
+                toast('识别完成', 'ok');
+                return;
+            }
+            if (d.status === 'failed') {
+                addLog('OCR 失败: ' + (d.error||'未知'), 'e');
+                $('btnOcr').disabled = false;
+                toast('识别失败', 'err');
+                return;
+            }
+            setTimeout(poll, 2000);
+        } catch(e) { setTimeout(poll, 5000); }
+    };
+    poll();
+}
+
+async function loadOcrResult(tid) {
+    try {
+        const r = await fetch('/api/ocr/result/' + tid);
+        const d = await r.json();
+        if (d.result) {
+            S.ocrData = d.result;
+            S.ocrEdited = {};
+            renderOcrTable(d.result);
+            renderOcrRegions(S.resultPage);
+        }
+    } catch(e) { addLog('加载结果失败', 'e'); }
+}
+
+// ═══════════════════════════════════════════
+// 日志
+// ═══════════════════════════════════════════
+async function pollLogs(tid) {
+    if (S.logTimer) clearInterval(S.logTimer);
+    S.logTimer = setInterval(async () => {
+        try {
+            const r = await fetch('/api/ocr/logs/' + tid);
+            if (!r.ok) return;
+            const d = await r.json();
+            if (d.logs && d.logs.length > S.logs.length) {
+                d.logs.slice(S.logs.length).forEach(l => addLog(l, 'auto'));
+            }
+        } catch(e) {}
+    }, 2000);
+}
+
+function addLog(text, type = 'i') {
+    if (type === 'auto') {
+        if (text.includes('[ERROR]') || text.includes('失败') || text.includes('异常')) type = 'e';
+        else if (text.includes('[WARNING]') || text.includes('警告')) type = 'w';
+        else if (text.includes('完成') || text.includes('成功')) type = 's';
+        else type = 'i';
+    }
+    S.logs.push({ text, type });
+    const box = $('logBox');
+    const ln = document.createElement('div');
+    ln.className = 'log-line ' + type;
+    ln.textContent = text;
+    box.appendChild(ln);
+    box.scrollTop = box.scrollHeight;
+    if (S.logs.length > 200) {
+        S.logs.shift();
+        box.removeChild(box.firstChild);
+    }
+}
+
+// 已移除旧的Canvas文字层，使用 renderOcrRegions() 代替
+
+// ═══════════════════════════════════════════
+// OCR结果可编辑表格
+// ═══════════════════════════════════════════
+function renderOcrTable(result) {
+    if (!result || !result.length) {
+        $('ocrBody').innerHTML = '<div class="empty"><div class="i">📭</div><p>无识别数据</p></div>';
+        return;
+    }
+    let html = `<table class="ocr-table">
+        <thead><tr><th>页</th><th>字段</th><th>识别结果</th></tr></thead><tbody>`;
+    result.forEach(page => {
+        const tpl = page.matched_template_page || page.page;
+        page.regions?.forEach(reg => {
+            const label = reg.label || '';
+            if (label.includes('特征区域') || label.includes('公共') || label.includes('页脚')) return;
+            const texts = reg.ocr_result?.texts || [];
+            const raw = texts.map(t => (t.content||'').trim()).filter(Boolean).join('；');
+            const editKey = `${page.page}_${reg.region_index}`;
+            const val = S.ocrEdited[editKey] ?? raw;
+            if (!val) return;
+            html += `<tr>
+                <td style="font-size:11px;color:var(--text2)">${tpl}</td>
+                <td class="fname">${esc(label || '字段'+reg.region_index)}</td>
+                <td class="fval">
+                    <input class="fedit" data-key="${editKey}" data-raw="${esc(raw)}"
+                        value="${esc(val)}" placeholder="${esc(raw||'空')}"
+                        onchange="onOcrEdit(this)" onkeyup="onOcrEdit(this)">
+                </td>
+            </tr>`;
+        });
+    });
+    html += '</tbody></table>';
+    $('ocrBody').innerHTML = html;
+}
+
+function onOcrEdit(el) {
+    const key = el.dataset.key;
+    const raw = el.dataset.raw;
+    const val = el.value.trim();
+    if (val && val !== raw) {
+        S.ocrEdited[key] = val;
+        el.style.background = '#fffbe6';
+    } else {
+        delete S.ocrEdited[key];
+        el.style.background = '';
+    }
+    // 显示/隐藏保存按钮
+    const hasEdits = Object.keys(S.ocrEdited).length > 0;
+    $('btnSaveEdit').style.display = hasEdits ? '' : 'none';
+    $('editBadge').style.display = hasEdits ? '' : 'none';
+    // 同步更新文字层
+    renderOcrRegions(S.resultPage);
+}
+
+function saveEdited() {
+    // 已修改的内容已存在 S.ocrEdited 中，比对时会自动合并
+    toast(`已保存 ${Object.keys(S.ocrEdited).length} 处修改，比对时将使用修改后内容`, 'ok');
+    $('btnSaveEdit').style.display = 'none';
+    $('editBadge').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════
+// 比对
+// ═══════════════════════════════════════════
+async function startCompare() {
+    if (!S.scanId || !S.fbId || !S.ocrFile) return;
+    $('btnComp').disabled = true;
+    try {
+        // 合并用户编辑到结果
+        const mergedResult = mergeEditedResult();
+        const r = await fetch('/api/compare', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+                report_result_file: S.ocrFile,
+                feedback_file_id: S.fbId,
+                edited_result: mergedResult,
+            })
+        });
+        const d = await r.json();
+        if (d.compare_id) {
+            S.cmpId = d.compare_id; S.cmpData = d;
+            showCompare(d);
+        }
+    } catch(e) { toast('比对失败', 'err'); }
+    $('btnComp').disabled = false;
+}
+
+function mergeEditedResult() {
+    if (!S.ocrData || !Object.keys(S.ocrEdited).length) return null;
+    const out = JSON.parse(JSON.stringify(S.ocrData));
+    out.forEach(page => {
+        page.regions?.forEach(reg => {
+            const key = `${page.page}_${reg.region_index}`;
+            if (S.ocrEdited[key] !== undefined && reg.ocr_result) {
+                reg.ocr_result.texts = [{ content: S.ocrEdited[key], score: 1.0 }];
+            }
+        });
+    });
+    return out;
+}
+
+function showCompare(d) {
+    $('reportCard').classList.remove('hide');
+    const st = d.summary?.statistics || {};
+    $('sTot').textContent = st.total || 0;
+    $('sOk').textContent = st.consistent || 0;
+    $('sBad').textContent = st.inconsistent || 0;
+    $('sMis').textContent = st.missing || 0;
+
+    const items = (d.diff_items || []).filter(x => x.result !== '一致');
+    const wrap = $('diffList');
+    if (!items.length) { wrap.innerHTML = '<div class="empty"><div class="i">✅</div><p>所有项目均一致</p></div>'; return; }
+    let h = '<table><thead><tr><th>章节</th><th>字段</th><th>报告表</th><th>反馈</th><th>状态</th></tr></thead><tbody>';
+    items.forEach(it => {
+        const cls = it.result === '不一致' ? 'diff-row' : 'diff-row warn';
+        const badge = it.result === '不一致'
+            ? '<span class="badge badge-err">不一致</span>'
+            : '<span class="badge badge-warn">缺失</span>';
+        h += `<tr class="${cls}">
+            <td>${esc(it.chapter||'')}</td>
+            <td>${esc(it.field||'')}</td>
+            <td>${esc(it.report_value||'-')}</td>
+            <td>${esc(it.feedback_value||'-')}</td>
+            <td>${badge}</td>
+        </tr>`;
+    });
+    wrap.innerHTML = h + '</tbody></table>';
+}
+
+// ═══════════════════════════════════════════
+// 重置 / 工具
+// ═══════════════════════════════════════════
+function resetAll() {
+    S.scanId = S.scanName = S.scanDoc = null;
+    S.fbId = S.fbName = null;
+    S.ocrTask = S.ocrFile = S.ocrData = null;
+    S.ocrEdited = {};
+    S.cmpId = S.cmpData = null;
+    S.logs = [];
+    S.resultPage = 1;
+    if (S.logTimer) clearInterval(S.logTimer);
+
+    $('scanUpload').classList.remove('hide');
+    $('cvsScan').classList.add('hide');
+    $('scanBar').classList.add('hide');
+    $('scanTag').textContent = '';
+    $('scanFileName').textContent = '';
+    $('scanInfo').textContent = '';
+    $('ocrRegionLayer').innerHTML = '';
+
+    $('feedbackBody').innerHTML = `
+        <div class="upload-fill" style="min-height:180px;margin:0" onclick="document.getElementById('finFb').click()">
+            <div class="icon">📊</div><div class="hint">点击上传反馈 Excel</div>
+            <div class="sub">支持 .xlsx / .xls</div>
+        </div>
+        <input type="file" id="finFb" class="hide" accept=".xlsx,.xls" onchange="handleFeedback(this.files[0])">`;
+
+    $('ocrBody').innerHTML = '<div class="empty"><div class="i">🔍</div><p>请先执行 OCR 识别</p></div>';
+    $('reportCard').classList.add('hide');
+    $('progFill').style.width = '0%';
+    $('progNum').textContent = '0%';
+    $('logBox').innerHTML = '<div class="log-line">等待开始识别...</div>';
+    $('finScan').value = '';
+    updBtns();
+}
+
+function updBtns() {
+    $('btnOcr').disabled = !S.scanId;
+    $('btnComp').disabled = !(S.scanId && S.fbId && S.ocrFile);
+}
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toast(msg, type = 'ok') {
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+function viewReport() { if (S.cmpId) window.open('/api/report/' + S.cmpId, '_blank'); }
+function exportReport() { if (S.cmpId) window.open('/api/export/compare-pdf/' + S.cmpId, '_blank'); }
+
+// ═══════════════════════════════════════════
+// 标签页
+// ═══════════════════════════════════════════
+function switchSeg(name) {
+    document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+    $('seg-' + name).classList.add('active');
+    $('pane-new').classList.toggle('hide', name !== 'new');
+    $('pane-hist').classList.toggle('hide', name !== 'hist');
+    if (name === 'hist') loadHist();
+}
+
+function switchSub(name) {
+    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+    $('sub-' + name).classList.add('active');
+    ['ocr','fb','cmp'].forEach(k => $('p-sub-' + k).classList.toggle('hide', k !== name));
+}
+
+// ═══════════════════════════════════════════
+// 历史记录
+// ═══════════════════════════════════════════
+async function loadHist() {
+    try {
+        const r = await fetch('/api/upload/history');
+        const d = await r.json();
+        renderTasks(d.recent_tasks || []);
+        renderFbs(d.recent_feedback || []);
+        renderCmps(d.recent_compares || []);
+    } catch(e) { toast('加载历史失败', 'err'); }
+}
+
+function renderTasks(tasks) {
+    const wrap = $('t-ocr');
+    if (!tasks.length) { wrap.innerHTML = emptyDiv('暂无 OCR 任务'); return; }
+    let h = '<table><thead><tr><th>任务ID</th><th>状态</th><th>进度</th><th>时间</th><th>操作</th></tr></thead><tbody>';
+    tasks.forEach(t => {
+        const cls = t.status==='completed'?'badge-ok':t.status==='failed'?'badge-err':'badge-warn';
+        h += `<tr>
+            <td style="font-family:monospace;font-size:11px">${t.task_id.slice(0,8)}...</td>
+            <td><span class="badge ${cls}">${t.status}</span></td>
+            <td>${t.progress||0}%</td>
+            <td>${fmt(t.created_at)}</td>
+            <td><button class="btn btn-gray btn-sm" onclick="viewTask('${t.task_id}')">查看</button></td>
+        </tr>`;
+    });
+    wrap.innerHTML = h + '</tbody></table>';
+}
+
+function renderFbs(files) {
+    const wrap = $('t-fb');
+    if (!files.length) { wrap.innerHTML = emptyDiv('暂无反馈文件'); return; }
+    let h = '<table><thead><tr><th>文件名</th><th>工作表</th><th>行数</th><th>时间</th><th>操作</th></tr></thead><tbody>';
+    files.forEach(f => {
+        h += `<tr>
+            <td>${esc(f.filename||'')}</td>
+            <td>${f.sheet_count||0}</td>
+            <td>${f.row_count||0}</td>
+            <td>${fmt(f.created_at)}</td>
+            <td><button class="btn btn-gray btn-sm" onclick="viewFb('${f.file_id}')">查看</button></td>
+        </tr>`;
+    });
+    wrap.innerHTML = h + '</tbody></table>';
+}
+
+function renderCmps(rs) {
+    const wrap = $('t-cmp');
+    if (!rs.length) { wrap.innerHTML = emptyDiv('暂无比对结果'); return; }
+    let h = '<table><thead><tr><th>比对ID</th><th>统计</th><th>一致率</th><th>时间</th><th>操作</th></tr></thead><tbody>';
+    rs.forEach(r => {
+        const st = r.stats||{};
+        const rate = calcRate(st);
+        const cls = rate==='100%'||rate==='N/A'?'badge-ok':parseFloat(rate)<80?'badge-err':'badge-warn';
+        h += `<tr>
+            <td style="font-family:monospace;font-size:11px">${r.compare_id.slice(0,8)}...</td>
+            <td>✅${st.consistent||0} ❌${st.inconsistent||0} ❓${st.missing||0}</td>
+            <td><span class="badge ${cls}">${rate}</span></td>
+            <td>${fmt(r.created_at)}</td>
+            <td><button class="btn btn-gray btn-sm" onclick="viewCmp('${r.compare_id}')">查看</button></td>
+        </tr>`;
+    });
+    wrap.innerHTML = h + '</tbody></table>';
+}
+
+function calcRate(st) {
+    const t = (st.consistent||0)+(st.inconsistent||0)+(st.missing||0);
+    if (!t) return 'N/A';
+    return ((st.consistent||0)/t*100).toFixed(1)+'%';
+}
+
+// 详情抽屉
+async function viewTask(tid) {
+    try {
+        const r = await fetch('/api/history/tasks/' + tid + '/result');
+        const d = await r.json();
+        showDrawer('OCR 识别结果', renderTaskDetail(d.result||[]));
+    } catch(e) { toast('加载失败', 'err'); }
+}
+
+function renderTaskDetail(result) {
+    if (!result.length) return '<p>无数据</p>';
+    let html = '';
+    result.forEach(p => {
+        html += `<div style="margin-bottom:14px">
+            <div style="font-size:12px;color:var(--blue2);font-weight:600;margin-bottom:6px">
+                📄 第 ${p.page} 页 → 模板第${p.matched_template_page}页
+            </div>`;
+        const regs = p.regions||[];
+        if (!regs.length) { html += '<p style="color:#aaa">无区域</p></div>'; return; }
+        regs.forEach(r => {
+            if (!r.ocr_result?.texts?.length) return;
+            const txt = r.ocr_result.texts.map(t=>esc(t.content||'')).join('；');
+            html += `<div style="background:var(--gray1);padding:7px 10px;border-radius:6px;margin-bottom:5px;font-size:12px">
+                <strong>${esc(r.label||'')}</strong>: ${txt}
+            </div>`;
+        });
+        html += '</div>';
+    });
+    return html || '<p style="color:#aaa">无有效数据</p>';
+}
+
+async function viewFb(fid) {
+    try {
+        const r = await fetch('/api/history/feedback/' + fid);
+        const d = await r.json();
+        showDrawer('反馈文件详情', renderFbDetail(d.chapters||{}));
+    } catch(e) { toast('加载失败', 'err'); }
+}
+
+function renderFbDetail(chs) {
+    let html = '';
+    for (const [ch, rows] of Object.entries(chs)) {
+        if (!rows?.length) continue;
+        const hdrs = Object.keys(rows[0]);
+        let tbl = `<table style="margin-bottom:12px">
+            <thead><tr>${hdrs.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>`;
+        rows.slice(0,15).forEach(r => { tbl += `<tr>${hdrs.map(h=>`<td>${esc(String(r[h]||''))}</td>`).join('')}</tr>`; });
+        if (rows.length>15) tbl += `<tr><td colspan="${hdrs.length}" style="color:#aaa;text-align:center">还有 ${rows.length-15} 行...</td></tr>`;
+        tbl += '</tbody></table>';
+        html += `<div style="margin-bottom:14px">
+            <div style="font-size:12px;color:var(--blue2);font-weight:600;margin-bottom:6px">📑 ${esc(ch)} (${rows.length}行)</div>
+            ${tbl}
+        </div>`;
+    }
+    return html || '<p style="color:#aaa">无数据</p>';
+}
+
+async function viewCmp(cid) {
+    try {
+        const r = await fetch('/api/history/compare/' + cid);
+        const d = await r.json();
+        showDrawer('比对结果', renderCmpDetail(d));
+    } catch(e) { toast('加载失败', 'err'); }
+}
+
+function renderCmpDetail(d) {
+    const st = d.summary?.statistics || d.stats || {};
+    let html = `<div class="stats" style="margin-bottom:14px">
+        <div class="stat"><div class="n">${st.total||0}</div><div class="l">总数</div></div>
+        <div class="stat g"><div class="n">${st.consistent||0}</div><div class="l">一致</div></div>
+        <div class="stat d"><div class="n">${st.inconsistent||0}</div><div class="l">不一致</div></div>
+        <div class="stat w"><div class="n">${st.missing||0}</div><div class="l">缺失</div></div>
+    </div>`;
+    const items = d.diff_items||[];
+    const bad = items.filter(x=>x.result==='不一致');
+    const mis = items.filter(x=>x.result==='缺失');
+    if (bad.length) {
+        html += `<div style="margin-bottom:12px">
+            <div style="font-size:12px;color:#ff3b30;font-weight:600;margin-bottom:6px">❌ 不一致 (${bad.length})</div>
+            <table><thead><tr><th>章节</th><th>字段</th><th>报告表</th><th>反馈</th></tr></thead><tbody>`;
+        bad.forEach(it=>{ html+=`<tr class="diff-row"><td>${esc(it.chapter||'')}</td><td>${esc(it.field||'')}</td><td>${esc(it.report_value||'')}</td><td>${esc(it.feedback_value||'')}</td></tr>`; });
+        html += '</tbody></table></div>';
+    }
+    if (mis.length) {
+        html += `<div style="margin-bottom:12px">
+            <div style="font-size:12px;color:#ff9f0a;font-weight:600;margin-bottom:6px">❓ 缺失 (${mis.length})</div>
+            <table><thead><tr><th>章节</th><th>字段</th><th>报告表</th></tr></thead><tbody>`;
+        mis.forEach(it=>{ html+=`<tr class="diff-row warn"><td>${esc(it.chapter||'')}</td><td>${esc(it.field||'')}</td><td>${esc(it.report_value||'')}</td></tr>`; });
+        html += '</tbody></table></div>';
+    }
+    if (!items.length) html += '<p style="color:#30d158;text-align:center;padding:16px">✅ 所有项目均一致</p>';
+    return html;
+}
+
+function showDrawer(title, html) {
+    $('drawerIn').innerHTML = `<div class="drawer-hd"><h3>${title}</h3><button class="drawer-close" onclick="closeDrawer()">×</button></div>${html}`;
+    $('drawer').classList.add('show');
+}
+function closeDrawer() { $('drawer').classList.remove('show'); }
+function emptyDiv(msg) { return `<div class="empty"><div class="i">📭</div><p>${msg}</p></div>`; }
+function fmt(s) { if(!s)return'-'; try{return new Date(s).toLocaleString('zh-CN')}catch{return s;} }
+
+// ═══════════════════════════════════════════
+// 服务状态
+// ═══════════════════════════════════════════
+async function checkStatus() {
+    try {
+        const r = await fetch('/health');
+        if (r.ok) {
+            $('statusDot').classList.add('ok');
+            $('statusText').textContent = '服务已连接';
+        } else throw '';
+    } catch {
+        $('statusDot').classList.remove('ok');
+        $('statusText').textContent = '服务未连接';
+    }
+}
+
+checkStatus();
+setInterval(checkStatus, 30000);
+
+// 窗口resize时重算scale
+// window resize: recalculate scale and refresh OCR layer
+window.addEventListener('resize', function() {
+    var img = $('tplImg');
+    if (!img.naturalWidth) return;
+    var renderedW = img.getBoundingClientRect().width;
+    S.tplScale = renderedW / (img.naturalWidth || 1241);
+    renderOcrRegions(S.resultPage);
+});
+
+</script>
+</body>
+</html>

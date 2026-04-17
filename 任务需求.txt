@@ -1,0 +1,404 @@
+我需要创建一个基于paddlevl模型（或其它轻量化的高效方法）识别的pdf内容提取与指定信息源信息比对功能的工具，
+主要用于个人有关事项报告表的信息提取及与上级反馈个人有关事项查核反馈信息的比对，显式标记不一致的字段并形成综合报告。
+
+软件功能及工作流程大体如下：
+一、单个pdf信息提取功能
+pdf为固定格式表格，均为手写，部分房产、股票、基金等项目的页数不固定（可能会有添加、补充页），部分人员会有补充报告表，样式不同，需另外提取，功能及格式咱们后续再设计。
+功能：将手写内容识别、提取为结构化文档，并根据模板进行UI展示，并以身份证号为主键记录到数据库中。
+二、多个pdf信息提取功能
+在单个pdf信息提取的基础上，增加批量信息提取功能，同样需记录到数据库、进行UI展示。
+三、查核反馈信息提取
+以身份证号和姓名为关联字段，提取、汇总，
+四、信息比对
+核心功能，将pdf提取的信息与查核反馈的信息进行比对，逐一报告不一致的字段，并形成综合报告。
+
+要求：
+1、技术栈，软件单机可部署，无网络环境依赖可运行，咱们共同讨论技术架构。
+2、ocr识别，我个人倾向于使用paddlevl模型（cpu版），不使用在线模型，但是你需要搜索一下有无新的更好的技术。
+3、提取信息结构化，需要json格式和本地数据库存储。
+4、其他要求你来考虑。
+
+参考模板：
+1、个人有关事项报告表样式："D:\grsxbd\模板\领导干部个人有关事项报告表.pdf"
+2、信息反馈样例："D:\grsxbd\模板\反馈信息样例.xlsx"
+
+我们先讨论，然后再指定开发计划。
+
+区域识别优化计划：
+0、预热：程序启动时，提前加载paddle，随时准备接收识别请求
+1、拆分：将报告表模板按页拆分成单独的pdf（可直接预设拆分好的分页模板），每页作为单独的比对模板，将用户上传的pdf扫描件也按页拆分成单页pdf
+2、匹配：将拆分后的扫描件精确匹配到需要差分的模板pdf
+3、差分：将扫描页与模板页进行交叉计算，剔除与模板文件一致的内容，确定需要识别的区域，以提高后续识别效率
+4、识别：将需要识别的区域传入paddle模型，进行批量识别，注意需要使用paddle的批量识别功能，即一次传入多个路径
+5、回流：将paddle识别结果记录到正确的字段名中
+6、整理：整理所有识别结果，保存到json和数据库，为后续数据处理和比对做准备
+7、清理：清理识别过程中产生的拆分文件、区域扫描文件等临时文件，清理除了paddle以外的进程，清理paddle中的其他任务
+
+我感觉这种差分方法还是会截取不需要的内容，paddle是否会识别印刷体和手写体？如果不行，还有一个方案，我们探讨是否可行：
+将模板逐页指定（预设）需要识别的区域，这样程序只需要正确判断拆分后的扫描件对应到哪个模板即可，然后按照需要扫描的区域传入paddle进行识别
+
+现在需要讨论，模板是拆分成单页进行标注好还是整体标注好？程序做匹配时是拆分成单页匹配好还是在整个的pdf中与整个的模板pdf做页面匹配好？我所说的好是指：1、速度快；2、准确度高。
+
+我们继续讨论一下后续的优化：
+1、将pdf模板拆分为单页的pdf模板（去除第4页的空白页后为21页），标注工具增加选择模板pdf的按钮，每页模板一个标注区域文件，对于我前面已经标注的第1、5页json可以拆分为对应页的标注文件，同时标注文件在打开pdf时，自动加载对应的json（如果有的话）并可修改。这样程序启动时可直接加载单页的pdf模板及单页的标注区域文件。
+2、页面匹配策略修改为：用户上传扫描件——程序将扫描件拆分为单页（去除空白页，需要讨论去除空白页的方法）——判断扫描件页数，如果与模板页数一致（21页）则按页序号逐页匹配pdf模板、不使用ssim匹配，如果页数与模板页数不一致则使用ssim匹配——将匹配的标注文件对应到相应的扫描件页上——传递扫描区域和扫描页到paddle进行识别——返回识别结果
+
+"D:\grsxbd\uploads\pdf\test_3pages.pdf"中为何根据你的程序，会判断第1页与模板的第4页更匹配？
+
+启动bat需要进行优化，需要3个，一个为启动项目服务，一个用于启动paddle，一个为同时调用上述2个，这样的话我就不用每次重启项目时还要等paddle再加载一遍了
+
+我还有新的问题：如果遇到多行填写的情况，应怎样标注？比如，扫描件中填写了多行的房产、股票、基金
+
+
+
+    存在问题：1、我提供的扫描pdf中是有空白页的，程序没有判断空白页就直接根据页数与模板页面进行了对应；2、程序没有对扫描件进行单页拆分，如果进行了拆分，告诉我拆分到哪里了？；3、程序貌似使用了之前的拆分文件进行识别（如果程序使用的是：D:\grsxbd\uploads\pdf\temp_split和D:\grsxbd\uploads\pdf\temp_images）
+
+    你不需要那么复杂，用户上传扫描件后，检测到空白页时直接删除扫描件中的空白页，然后拆分就行了，不用计算映射页序，因为模板页也没有空白页，而且我们之前讨论过，模板现在是单页的版本
+
+
+讨论：
+一、程序的执行过程是否是这样的：先拆分扫描件，然后判断有2个空页，然后数出总页数是21，然后判断和模板页数一致，然后就进行了匹配。这是错误的，2个空页不应该计入总页数，这个测试的pdf去掉空白页实际上只有19页，与模板页数是不一致的，导致没有执行ssim匹配。
+二、后台日志经常提示：D:\grsxbd\.venv_paddleocr\Lib\site-packages\paddle\tensor\creation.py:1152: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach(), rather than paddle.to_tensor(sourceTensor).
+我们是否要换成建议的调用方法？
+三、我git了ccache项目，因为我看paddle日志中一直提示没有这个项目，你看看，有没有可能用得上：D:\grsxbd\ccache
+
+
+D:\grsxbd\templates\pages中的模板页已经没有空白页面了，你不用纠结模板页的空白页问题，处理扫描件的空白页时，索性删除扫描件的空白页吧，
+
+
+首先，D:\grsxbd\uploads\pdf\temp_split下仍然是老的扫描件拆分，还有空白页，你测试时应当先将"D:\grsxbd\test\个人事项报告测试.pdf"
+
+现在看出问题来了，程序虽然计算出删除空白页后的页数为19页，与模板的21页不相符，仍然进行了页序匹配，而没有进行orb匹配，造成了删除空白页后的扫描pdf的扫描页 2 → 模板页 2、扫描页 3 → 模板页 3，我说过，模板的第2页是填表说明、第3页是目录，这种匹配是错误的。
+
+能否添加一个预处理扫描件的过程，干2件事：1、删除空白页；2、判断第2、3页有无与模板2、模板3的页面，如果有则删除。然后使用处理过的扫描件进行后续的拆分和识别流程。
+
+最终页数应该不是21了，而是19，因为删除了说明、目录页。为了和模板匹配，处理过的扫描件拆分时命名可以不连续，即可按照1、（如果判断没有第2、3页）、4、5..这样命名。还有，如果去除空白页和说明、目录后，总页数<19，怎么与模板页进行匹配？需要讨论。先别急操作
+
+我倾向于方案B，测试扫描件的原始页数是21页，有2个空白页，但没有说明和目录页，所以我说删除空白页和说明、目录页后是19页，当然，真实的情况只会更复杂，我们应当预想到。关于你说的后续页面匹配的问题，我仍然倾向于使用ORB匹配或者ssim匹配，或者你还有没有更好的方案？
+还有，我看程序把paddle限定了线程锁，需要讨论在计算机cpu和内存充足的情况下，多线程调用paddle同步进行识别的可能性。
+
+还是使用"D:\grsxbd\start_all.bat"来启动项目吗？
+
+
+我已经启动了项目，并对21页模板的特征区域添加了标记，标签名为：第X页特征区域，现在需要：将D:\grsxbd\templates\regions中的json中的特征区域提取并合并到一个json中去，在预ocr时，使用这个json中的区域对扫描文件进行预识别，汇总特征区域识别结果，以判断对应哪个模板页面，对应页面具体是：
+第1页特征区域——期待识别结果：领导干部个人有关事项报告表——对应：模板1
+第2页特征区域——期待识别结果：填表须知——对应：模板2
+第3页特征区域——期待识别结果：目录——对应：模板3
+第4页特征区域——期待识别结果：1——对应：模板4
+第5页特征区域——期待识别结果：2——对应：模板5
+第6页特征区域——期待识别结果：3——对应：模板6
+第7页特征区域——期待识别结果：4——对应：模板7
+第8页特征区域——期待识别结果：5——对应：模板8
+第9页特征区域——期待识别结果：6——对应：模板9
+第10页特征区域——期待识别结果：7——对应：模板10
+第11页特征区域——期待识别结果：8——对应：模板11
+第12页特征区域——期待识别结果：9——对应：模板12
+第13页特征区域——期待识别结果：10——对应：模板13
+第14页特征区域——期待识别结果：11——对应：模板14
+第15页特征区域——期待识别结果：12：模板15
+第16页特征区域——期待识别结果：13——对应：模板16
+第17页特征区域——期待识别结果：14——对应：模板17
+第18页特征区域——期待识别结果：15——对应：模板18
+第19页特征区域——期待识别结果：16——对应：模板19
+第20页特征区域——期待识别结果：17——对应：模板20
+第21页特征区域——期待识别结果：18——对应：模板21
+
+需要说明的是：1、期待识别结果需要处理空格、横线等字符；2、特征区域合并后会有重叠，要防止paddle重复识别同一区域；3、第4页特征区域之后的识别区域均为页面上的页码（奇偶页不同）
+
+
+存在问题：1、预ocr识别没有按照D:\grsxbd\templates\pre_ocr_region.json规定的区域进行识别，而是进行了全页识别，速度很慢
+2、预ocr识别没有按照我们之前讨论的方法，对每个拆分页进行区域快速识别，只识别了第一页，而且还是全页识别；
+3、我们设定的线程池好像没有起作用，程序依然在单线程跑。
+日志：
+ INFO:     127.0.0.1:53803 - "GET /api/ocr/status/4d12ef0a-d539-4a20-983c-a1e3c5014554 HTTP/1.1" 200 OK
+  已完成 1/1 张图片
+INFO:api.ocr:[PreOCR] 扫描页 seq=0 → "领导干部个人有关事项报告表 报告人___斯维因___（签名） 单位 诺克萨斯及北爱尔兰王国 报告日期 2438 年 4 月 14 日 阅签人___德莱文___（"
+INFO:api.ocr:[PreOCR] 扫描页 seq=0 → 模板页1 (得分=1.00, 方法=preocr)
+[OCRWorkerPool] Dispatching 1 images → 1 chunks × 4 workers
+  开始批量识别 1 张图片...
+INFO:     127.0.0.1:53805 - "GET /api/ocr/status/4d12ef0a-d539-4a20-983c-a1e3c5014554 HTTP/1.1" 200 OK
+
+我之前的想法是，扫描件上传后， 1.程序先对扫描件进行预处理，去除空白页、重复页和须知、目录页，然后对扫描件 pdf 进行单页拆分；2.程序对每个拆分后的 pdf 按照指定公共区域（3 块，定义在模板 1、2 中，需要 对每个 pdf进行这 3 个区域截取并每个合并成一张图） 快速ocr，查看识别结果，根据识别结果和对照清单将各页面对应到模板；3.扫描件各页对应模板后，使用模板对应的标签区域进行批量扫描，避免了全页扫描，提升处理效率
+
+
+umiocr项目中的paddle速度很快，我觉得可以将其核心代码加入到我们的项目中，这样的话就不需要进行预ocr了，我们的项目改为前后端分离的，
+后端完全复用umiocr
+但是在处理扫描文件时，依然需要前端处理，因为每一页都识别产生的噪声太多了，我们不需要全页扫描，依然是由程序对扫描文件进行预处理，清理空白和须、目录、重复页，然后进行逐页拆分，截取每页对应的指定区域，传递到后端进行识别
+
+等等，如果是三区域裁剪的话，我希望使用这个区域：D:\grsxbd\templates\pre_ocr_region.json，在预ocr时，使用这个json中的区域对扫描文件进行预识别，汇总特征区域识别结果，以判断对应哪个模板页面，对应页面具体是：
+
+
+需要优化预ocr逻辑，不再拼接3块区域，因为ocr还是有噪声，逻辑调整为：
+第一步，统一识别页脚区域的页码
+即识别：
+      "x1": 12,
+      "y1": 1628,
+      "x2": 1216,
+      "y2": 1732
+识别结果对应：
+识别结果：1——对应：模板4
+识别结果：2——对应：模板5
+识别结果：3——对应：模板6
+识别结果：4——对应：模板7
+识别结果：5——对应：模板8
+识别结果：6——对应：模板9
+识别结果：7——对应：模板10
+识别结果：8——对应：模板11
+识别结果：9——对应：模板12
+识别结果：10——对应：模板13
+识别结果：11——对应：模板14
+识别结果：12——对应：模板15
+识别结果：13——对应：模板16
+识别结果：14——对应：模板17
+识别结果：15——对应：模板18
+识别结果：16——对应：模板19
+识别结果：17——对应：模板20
+识别结果：18——对应：模板21
+识别结果：空或者其他文字——转入第二步
+
+第二步，补充识别第一步中无对应的页
+1、识别区域
+      "x1": 263,
+      "y1": 343,
+      "x2": 997,
+      "y2": 460
+2、识别判断：
+识别结果：领导干部个人有关事项报告表——对应：模板1
+识别结果为其他内容——转入第三步
+
+
+第三步，补充识别第二步中无对应的页
+1、识别区域
+      "x1": 376,
+      "y1": 125,
+      "x2": 880,
+      "y2": 249
+2、识别判断：
+识别结果：填表须知——对应：模板2
+识别结果：目录——对应：模板3
+识别结果为其他内容——提醒用户，由用户输入对应的模板上的页码
+
+
+UI优化需求：
+UI为瀑布式排列，保留现有的“新任务”“历史记录”标签页
+“新任务”标签页从上到下为
+1、pdf上传展示区
+分2栏，左侧为上传扫描件及预览区域，上传扫描件后，在预览区应当展示pdf预览，带页面导航、缩放、旋转等功能
+右侧为识别结果展示区，要求默认先展示报告表模板pdf，页面导航与预览区域一致，即预览区导航第1页则识别结果展示区也展示报告表模板第1页，无对应扫描页的不展示；ocr识别结束后，在结果展示区添加文字层，按照D:\grsxbd\templates\regions中各页的区域填充识别结果到对应位置，要求文字层的位置及缩放大小与报告表模板pdf同步
+2、识别进度展示，同步抓取后台日志在进度条下方滚动显示程序在做什么
+3、按钮区
+开始ocr识别、开始比对、重置
+4、数据比对区
+分2栏，左侧为上传反馈信息及展示区，上传查核反馈结果后，在本区域展示数据预览；右侧以markdown样式展示ocr识别结果的键值对——本部分后续待优化
+5、比对报告区
+先保持当前实现，后续再优化
+
+1、扫描文件上传后，预览没有展现，控制台提示：（索引）:667 PDF加载失败: 
+UnexpectedResponseException
+loadDoc	@	（索引）:667，模板文件展示正常。
+2、上传反馈信息后，预览一直提示：预览加载中...，控制台无报错。
+3、ocr完成后，结果展示区中的文字层没有对应到底层的模板pdf的正确位置、有偏移（比如日期的识别结果展示到了右侧的空白区域），且切换页面后文字层一直在展示第1页的识别结果，页面翻页后导航控件也一直在1/21。
+4、UI需要再美化一下，可以套用苹果官方网站风格样式；扫描件预览区的占位区域太小，与框架大小不一致，反馈信息区域则正常。
+5、ocr识别后，在结果展示区的文字层和 OCR 识别结果区需要支持用户编辑保存，以纠正识别的错误，用户编辑后，后续数据处理均使用用户修改后的内容
+
+
+既然所有的报告表都是同一模板，页数也差不多，我能否对paddlev5模型进行微调提高速度和精度呢？
+
+
+D:\Download\paddle_deps目录下有下载好的依赖包，可以查看安装，以下是官方文档中的有关说明：快速开始¶
+在本地使用通用OCR产线前，请确保您已经按照安装教程完成了wheel包安装。安装完成后，可以在本地使用命令行体验或 Python 集成。
+
+请注意，如果在执行过程中遇到程序失去响应、程序异常退出、内存资源耗尽、推理速度极慢等问题，请尝试参考文档调整配置，例如关闭不需要使用的功能或使用更轻量的模型。
+
+2.0 环境准备¶
+2.0.1 基础安装¶
+
+# 安装基础版本（仅包含OCR功能）
+pip install paddleocr
+
+# 安装完整版本（包含所有功能）
+pip install "paddleocr[all]"
+2.0.2 环境验证¶
+
+# 验证安装是否成功
+import paddleocr
+print(f"PaddleOCR版本: {paddleocr.__version__}")
+
+# 验证GPU是否可用
+import paddle
+print(f"Paddle版本: {paddle.__version__}")
+print(f"GPU可用: {paddle.is_compiled_with_cuda()}")
+print(f"GPU数量: {paddle.device.cuda.device_count()}")
+2.0.3 常见安装问题解决¶
+问题1：依赖冲突
+
+
+# 解决方案：创建新的虚拟环境
+conda create -n paddleocr python=3.8
+conda activate paddleocr
+pip install paddleocr
+问题2：GPU环境配置
+
+
+# 检查CUDA版本
+nvidia-smi
+
+# 安装对应版本的PaddlePaddle
+pip install paddlepaddle-gpu==3.0.0 -f https://www.paddlepaddle.org.cn/whl/linux/mkl/avx/stable.html
+问题3：模型下载失败
+
+
+# 设置模型下载源
+import os
+os.environ['PADDLE_PDX_MODEL_SOURCE'] = 'BOS'  # 使用百度云存储
+2.1 命令行方式¶
+一行命令即可快速体验OCR产线效果。运行以下代码前，请您下载示例图片到本地：
+
+
+# 默认使用 PP-OCRv5 模型
+paddleocr ocr -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_002.png \
+    --use_doc_orientation_classify False \
+    --use_doc_unwarping False \
+    --use_textline_orientation False \
+    --save_path ./output \
+    --device gpu:0 
+
+# 通过 --ocr_version 指定 PP-OCR 其他版本
+paddleocr ocr -i ./general_ocr_002.png --ocr_version PP-OCRv4
+命令行支持更多参数设置，点击展开以查看命令行参数的详细说明
+
+
+运行结果会被打印到终端上。Python脚本方式集成¶
+命令行方式是为了快速体验查看效果，一般来说，在项目中，往往需要通过代码集成，您可以通过几行代码即可完成产线的快速推理，推理代码如下：
+
+
+from paddleocr import PaddleOCR
+
+ocr = PaddleOCR(
+    use_doc_orientation_classify=False, # 通过 use_doc_orientation_classify 参数指定不使用文档方向分类模型
+    use_doc_unwarping=False, # 通过 use_doc_unwarping 参数指定不使用文本图像矫正模型
+    use_textline_orientation=False, # 通过 use_textline_orientation 参数指定不使用文本行方向分类模型
+)
+# ocr = PaddleOCR(lang="en") # 通过 lang 参数来使用英文模型
+# ocr = PaddleOCR(ocr_version="PP-OCRv4") # 通过 ocr_version 参数来使用 PP-OCR 其他版本
+# ocr = PaddleOCR(device="gpu") # 通过 device 参数使得在模型推理时使用 GPU
+# ocr = PaddleOCR(
+#     text_detection_model_name="PP-OCRv5_server_det",
+#     text_recognition_model_name="PP-OCRv5_server_rec",
+#     use_doc_orientation_classify=False,
+#     use_doc_unwarping=False,
+#     use_textline_orientation=False,
+# ) # 更换 PP-OCRv5_server 模型
+result = ocr.predict("./general_ocr_002.png")
+for res in result:
+    res.print()
+    res.save_to_img("output")
+    res.save_to_json("output")
+在上述 Python 脚本中，执行了如下几个步骤：
+
+（1）通过 PaddleOCR() 实例化 OCR 产线对象，具体参数说明如下：
+（2）调用 OCR 产线对象的 predict() 方法进行推理预测，该方法会返回一个结果列表。另外，产线还提供了 predict_iter() 方法。两者在参数接受和结果返回方面是完全一致的，区别在于 predict_iter() 返回的是一个 generator，能够逐步处理和获取预测结果，适合处理大型数据集或希望节省内存的场景。可以根据实际需求选择使用这两种方法中的任意一种。以下是 predict() 方法的参数及其说明：
+（3）对预测结果进行处理，每个样本的预测结果均为对应的Result对象，且支持打印、保存为图片、保存为json文件的操作:
+3. 开发集成/部署¶
+如果通用 OCR 产线可以达到您对产线推理速度和精度的要求，您可以直接进行开发集成/部署。
+
+若您需要将通用 OCR 产线直接应用在您的Python项目中，可以参考2.2 Python脚本方式集成中的示例代码。
+
+此外，PaddleOCR 也提供了其他两种部署方式，详细说明如下：
+
+🚀 高性能推理：在实际生产环境中，许多应用对部署策略的性能指标（尤其是响应速度）有着较严苛的标准，以确保系统的高效运行与用户体验的流畅性。为此，PaddleOCR 提供高性能推理功能，旨在对模型推理及前后处理进行深度性能优化，实现端到端流程的显著提速，详细的高性能推理流程请参考高性能推理。
+
+☁️ 服务化部署：服务化部署是实际生产环境中常见的一种部署形式。通过将推理功能封装为服务，客户端可以通过网络请求来访问这些服务，以获取推理结果。详细的产线服务化部署流程请参考服务化部署。
+
+以下是基础服务化部署的API参考与多语言服务调用示例：
+
+API参考
+对于服务提供的主要操作：
+
+HTTP请求方法为POST。
+请求体和响应体均为JSON数据（JSON对象）。
+当请求处理成功时，响应状态码为200，响应体的属性如下：
+名称	类型	含义
+logId	string	请求的UUID。
+errorCode	integer	错误码。固定为0。
+errorMsg	string	错误说明。固定为"Success"。
+result	object	操作结果。
+当请求处理未成功时，响应体的属性如下：
+名称	类型	含义
+logId	string	请求的UUID。
+errorCode	integer	错误码。与响应状态码相同。
+errorMsg	string	错误说明。
+服务提供的主要操作如下：
+
+infer
+获取图像OCR结果。
+
+POST /ocr
+
+请求体的属性如下：
+名称	类型	含义	是否必填
+file	string	服务器可访问的图像文件或PDF文件的URL，或上述类型文件内容的Base64编码结果。默认对于超过10页的PDF文件，只有前10页的内容会被处理。
+要解除页数限制，请在产线配置文件中添加以下配置：
+
+Serving:
+  extra:
+    max_num_input_imgs: null
+是
+fileType	integer | null	文件类型。0表示PDF文件，1表示图像文件。若请求体无此属性，则将根据URL推断文件类型。	否
+useDocOrientationClassify	boolean | null	请参阅产线对象中 predict 方法的 use_doc_orientation_classify 参数相关说明。	否
+useDocUnwarping	boolean | null	请参阅产线对象中 predict 方法的 use_doc_unwarping 参数相关说明。	否
+useTextlineOrientation	boolean | null	请参阅产线对象中 predict 方法的 use_textline_orientation 参数相关说明。	否
+textDetLimitSideLen	integer | null	请参阅产线对象中 predict 方法的 text_det_limit_side_len 参数相关说明。	否
+textDetLimitType	string | null	请参阅产线对象中 predict 方法的 text_det_limit_type 参数相关说明。	否
+textDetThresh	number | null	请参阅产线对象中 predict 方法的 text_det_thresh 参数相关说明。	否
+textDetBoxThresh	number | null	请参阅产线对象中 predict 方法的 text_det_box_thresh 参数相关说明。	否
+textDetUnclipRatio	number | null	请参阅产线对象中 predict 方法的 text_det_unclip_ratio 参数相关说明。	否
+textRecScoreThresh	number | null	请参阅产线对象中 predict 方法的 text_rec_score_thresh 参数相关说明。	否
+visualize	boolean | null	是否返回可视化结果图以及处理过程中的中间图像等。
+传入 true：返回图像。
+传入 false：不返回图像。
+若请求体中未提供该参数或传入 null：遵循产线配置文件Serving.visualize 的设置。
+
+例如，在产线配置文件中添加如下字段：
+
+Serving:
+  visualize: False
+将默认不返回图像，通过请求体中的visualize参数可以覆盖默认行为。如果请求体和配置文件中均未设置（或请求体传入null、配置文件中未设置），则默认返回图像。	否
+请求处理成功时，响应体的result具有如下属性：
+名称	类型	含义
+ocrResults	object	OCR结果。数组长度为1（对于图像输入）或实际处理的文档页数（对于PDF输入）。对于PDF输入，数组中的每个元素依次表示PDF文件中实际处理的每一页的结果。
+dataInfo	object	输入数据信息。
+ocrResults中的每个元素为一个object，具有如下属性：
+
+名称	类型	含义
+prunedResult	object	产线对象的 predict 方法生成结果的 JSON 表示中 res 字段的简化版本，其中去除了 input_path 和 page_index 字段。
+ocrImage	string | null	OCR结果图，其中标注检测到的文本位置。图像为JPEG格式，使用Base64编码。
+docPreprocessingImage	string | null	可视化结果图像。图像为JPEG格式，使用Base64编码。
+inputImage	string | null	输入图像。图像为JPEG格式，使用Base64编码。
+
+
+
+2.1 命令行方式体验¶
+一行命令即可快速体验 PaddleOCR-VL 效果：
+paddleocr doc_parser -i "D:\grsxbd\uploads\pdf\temp_images\page_009.png" --device cpu
+
+
+
+docker exec paddle_docker bash -c 'pip install "paddleocr[all]" '
+
+docker exec paddle_docker bash -c "mkdir -p /tmp/pip_cache && pip install 'paddleocr[all]' --cache-dir /tmp/pip_cache --proxy http://host.docker.internal:31181 -i https://pypi.tuna.tsinghua.edu.cn/simple"
+
+
+docker rm -f paddle_docker 2>/dev/null; echo "旧容器已删除"
+
+docker rm -f paddle_docker
+docker run --name paddle_docker -d `
+  -v //d/grsxbd/paddle:/paddle `
+  -v //d/grsxbd/paddle/pip_cache:/tmp/pip_cache `
+  -v //d/grsxbd/paddle/models:/home/jovyan/.paddlex/official_models `
+  paddlepaddle/paddle:3.3.0-jupyter sleep infinity
+
+
+docker exec paddle_docker bash -c "pip install 'paddleocr[all]' --cache-dir /tmp/pip_cache --proxy http://host.docker.internal:31181 -i https://pypi.tuna.tsinghua.edu.cn/simple"
+
+

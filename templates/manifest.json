@@ -1,0 +1,138 @@
+{
+  "name": "PDFtemplates",
+  "original_pages": 22,
+  "effective_pages": 21,
+  "blank_pages_removed": [
+    4
+  ],
+  "page_order": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+  ],
+  "pages": {
+    "1": {
+      "pdf": "PDFtemplates_001.pdf",
+      "image": "page_001.png",
+      "old_page": 1
+    },
+    "2": {
+      "pdf": "PDFtemplates_002.pdf",
+      "image": "page_002.png",
+      "old_page": 2
+    },
+    "3": {
+      "pdf": "PDFtemplates_003.pdf",
+      "image": "page_003.png",
+      "old_page": 3
+    },
+    "4": {
+      "pdf": "PDFtemplates_004.pdf",
+      "image": "page_004.png",
+      "old_page": 5
+    },
+    "5": {
+      "pdf": "PDFtemplates_005.pdf",
+      "image": "page_005.png",
+      "old_page": 6
+    },
+    "6": {
+      "pdf": "PDFtemplates_006.pdf",
+      "image": "page_006.png",
+      "old_page": 7
+    },
+    "7": {
+      "pdf": "PDFtemplates_007.pdf",
+      "image": "page_007.png",
+      "old_page": 8
+    },
+    "8": {
+      "pdf": "PDFtemplates_008.pdf",
+      "image": "page_008.png",
+      "old_page": 9
+    },
+    "9": {
+      "pdf": "PDFtemplates_009.pdf",
+      "image": "page_009.png",
+      "old_page": 10
+    },
+    "10": {
+      "pdf": "PDFtemplates_010.pdf",
+      "image": "page_010.png",
+      "old_page": 11
+    },
+    "11": {
+      "pdf": "PDFtemplates_011.pdf",
+      "image": "page_011.png",
+      "old_page": 12
+    },
+    "12": {
+      "pdf": "PDFtemplates_012.pdf",
+      "image": "page_012.png",
+      "old_page": 13
+    },
+    "13": {
+      "pdf": "PDFtemplates_013.pdf",
+      "image": "page_013.png",
+      "old_page": 14
+    },
+    "14": {
+      "pdf": "PDFtemplates_014.pdf",
+      "image": "page_014.png",
+      "old_page": 15
+    },
+    "15": {
+      "pdf": "PDFtemplates_015.pdf",
+      "image": "page_015.png",
+      "old_page": 16
+    },
+    "16": {
+      "pdf": "PDFtemplates_016.pdf",
+      "image": "page_016.png",
+      "old_page": 17
+    },
+    "17": {
+      "pdf": "PDFtemplates_017.pdf",
+      "image": "page_017.png",
+      "old_page": 18
+    },
+    "18": {
+      "pdf": "PDFtemplates_018.pdf",
+      "image": "page_018.png",
+      "old_page": 19
+    },
+    "19": {
+      "pdf": "PDFtemplates_019.pdf",
+      "image": "page_019.png",
+      "old_page": 20
+    },
+    "20": {
+      "pdf": "PDFtemplates_020.pdf",
+      "image": "page_020.png",
+      "old_page": 21
+    },
+    "21": {
+      "pdf": "PDFtemplates_021.pdf",
+      "image": "page_021.png",
+      "old_page": 22
+    }
+  }
+}

@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+.venv_paddleocr/
+
+# Large files
+*.exe
+*.7z
+*.zip
+*.tar.gz
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+
+# Data and cache
+.paddlex/
+ccache/
+.cache/
+*.db
+*.sqlite
+
+# Test output
+current_page.png
+ocr_debug_results.json
+ocr_results/
+compare_results/
+uploads/
+test/
+PaddleOCR-json/
+Umi-OCR/
+Umi-OCR_Paddle_v2.1.5/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Claude
+.claude/
+claude-*.md
+
+# Playwright
+.playwright-mcp/
+
+# Private data
+*.jsonl
+doc_content.txt
+temp/
+fix-final.png
+ocr-after-fix.png
+ocr-check.png
+page-check.png
+page1_final.png
+page4.png
+page4_nav.png
+page4_overlay.png
+page5_nav.png
+page5_overlay.png
+page6_nav.png
+page6_overlay.png
+pdf_view.png
+t2.png
+word_output.txt
+tmp/
+static/docs.pdf
+# OCR models
+models/
+paddle/models/

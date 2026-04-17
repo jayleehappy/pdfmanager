@@ -1,0 +1,455 @@
+{
+  "method": "Hybrid: UmiOCR detection + PP-OCRv5_server_rec recognition",
+  "detection": {
+    "engine": "UmiOCR (PaddleOCR-json)",
+    "time_s": 0.878166675567627,
+    "regions": 54
+  },
+  "recognition": {
+    "model": "PP-OCRv5_server_rec",
+    "load_time_s": 3.1,
+    "rec_time_s": 44.26,
+    "ms_per_region": 819.7
+  },
+  "accuracy": {
+    "full": 63.0,
+    "partial": 96.3,
+    "correct": 34,
+    "total": 54
+  },
+  "pure_umiocr_readable": "54/54 = 100%",
+  "details": [
+    {
+      "index": 0,
+      "gt_text": "2．本人的健康状况",
+      "pp5_text": "2.本人的健康状况",
+      "pp5_score": 0.9963420033454895,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 1,
+      "gt_text": "后子20.>1.32年南荐斯题,限接受肾",
+      "pp5_text": "先后于2430.2431.232年在诺克萨斯总.后院接受肾",
+      "pp5_score": 0.7531476020812988,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 2,
+      "gt_text": "是否身患",
+      "pp5_text": "是否身患",
+      "pp5_score": 0.9991915225982666,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 3,
+      "gt_text": "重大疾病",
+      "pp5_text": "重大疾病",
+      "pp5_score": 0.9936022162437439,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 4,
+      "gt_text": "微剑称，同前健康状说良如。",
+      "pp5_text": "微创手术，目前健康状观良好。",
+      "pp5_score": 0.8025134205818176,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 5,
+      "gt_text": "说明：应填写本人既往患重大疾病和实施重大手术情况，新发重大疾病和诊治情况，",
+      "pp5_text": "说明：应填写本人既往患重大疾病和实施重大手术情况，新发重大疾病和诊治情况，",
+      "pp5_score": 0.9948521256446838,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 6,
+      "gt_text": "以及本人认为需要报告的健康状况方面其他情况。重大疾病是指患恶性肿瘤、严重心脑",
+      "pp5_text": "以及本人认为需要报告的健康状况方面其他情况。重大疾病是指患恶性肿瘤、严重心脑",
+      "pp5_score": 0.9901626110076904,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 7,
+      "gt_text": "血管疾病、重大传染性疾病和其他可能造成终身残疾的病伤，需要进行重要器官移植的",
+      "pp5_text": "血管疾病、重大传染性疾病和其他可能造成终身残疾的病伤，需要进行重要器官移植的",
+      "pp5_score": 0.9961807727813721,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 8,
+      "gt_text": "疾病，以及严重的心理和精神疾病等。存在上述情况的，应如实填写疾病名称、确诊时",
+      "pp5_text": "疾病，以及严重的心理和精神疾病等，存在上述情况的，应如实填写疾病名称、确诊时",
+      "pp5_score": 0.9794487953186035,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 9,
+      "gt_text": "间、诊断医疗机构、治疗康复情况等；没有需要报告内容的，在表格内填写“无”。",
+      "pp5_text": "间、诊断医疗机构、治疗康复情况等；没有需要报告内容的，在表格内填写“无”。",
+      "pp5_score": 0.9929624199867249,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 10,
+      "gt_text": "3．本人持有普通护照和因私出国的情况",
+      "pp5_text": "3.本人持有普通护照和因私出国的情况",
+      "pp5_score": 0.997346043586731,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 11,
+      "gt_text": "持有普通护照的情况",
+      "pp5_text": "持有普通护照的情况",
+      "pp5_score": 0.9998379945755005,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 12,
+      "gt_text": "护照号",
+      "pp5_text": "护照号",
+      "pp5_score": 0.9998238682746887,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 13,
+      "gt_text": "Ak 4304502",
+      "pp5_text": "A1<4304502",
+      "pp5_score": 0.9139842987060547,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 14,
+      "gt_text": "起止日期",
+      "pp5_text": "起止日期",
+      "pp5_score": 0.9998218417167664,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 15,
+      "gt_text": "起：24年12月3日",
+      "pp5_text": "起：242年12月3日",
+      "pp5_score": 0.9091945886611938,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 16,
+      "gt_text": "至：2413年9月6日",
+      "pp5_text": "至：2413年9月6日",
+      "pp5_score": 0.9437293410301208,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 17,
+      "gt_text": "起：",
+      "pp5_text": "起：",
+      "pp5_score": 0.8626832962036133,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 18,
+      "gt_text": "年月",
+      "pp5_text": "年月",
+      "pp5_score": 0.9998671412467957,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 19,
+      "gt_text": "至：",
+      "pp5_text": "至：",
+      "pp5_score": 0.9708473682403564,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 20,
+      "gt_text": "年月",
+      "pp5_text": "年月",
+      "pp5_score": 0.9998589158058167,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 21,
+      "gt_text": "起：年月",
+      "pp5_text": "起：年月",
+      "pp5_score": 0.9670937061309814,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 22,
+      "gt_text": "日",
+      "pp5_text": "日",
+      "pp5_score": 0.8453400135040283,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 23,
+      "gt_text": "至：年月",
+      "pp5_text": "至：年月",
+      "pp5_score": 0.9915937781333923,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 24,
+      "gt_text": "日",
+      "pp5_text": "日",
+      "pp5_score": 0.9870712161064148,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 25,
+      "gt_text": "签发日期",
+      "pp5_text": "签发日期",
+      "pp5_score": 0.9998551607131958,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 26,
+      "gt_text": "2408年3月1日",
+      "pp5_text": "2428年3月1日",
+      "pp5_score": 0.9524946212768555,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 27,
+      "gt_text": "年月",
+      "pp5_text": "年月",
+      "pp5_score": 0.9999632239341736,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 28,
+      "gt_text": "所到国家",
+      "pp5_text": "所到国家",
+      "pp5_score": 0.9996349811553955,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 29,
+      "gt_text": "影岛",
+      "pp5_text": "暗影岛",
+      "pp5_score": 0.9963316321372986,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 30,
+      "gt_text": "日",
+      "pp5_text": "日",
+      "pp5_score": 0.9913762211799622,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 31,
+      "gt_text": "有效期至",
+      "pp5_text": "有效期至",
+      "pp5_score": 0.9999247193336487,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 32,
+      "gt_text": "2500年3月1日",
+      "pp5_text": "2500年3月1日",
+      "pp5_score": 0.9856283664703369,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 33,
+      "gt_text": "年月",
+      "pp5_text": "年月",
+      "pp5_score": 0.9999648332595825,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 34,
+      "gt_text": "因私出国的情况",
+      "pp5_text": "因私出国的情况",
+      "pp5_score": 0.9994651079177856,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 35,
+      "gt_text": "事",
+      "pp5_text": "事由",
+      "pp5_score": 0.7808821201324463,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 36,
+      "gt_text": "由",
+      "pp5_text": "由",
+      "pp5_score": 0.9729931354522705,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 37,
+      "gt_text": "旅游",
+      "pp5_text": "旅游",
+      "pp5_score": 0.9833025932312012,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 38,
+      "gt_text": "日",
+      "pp5_text": "日",
+      "pp5_score": 0.9858761429786682,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 39,
+      "gt_text": "保管机构",
+      "pp5_text": "保管机构",
+      "pp5_score": 0.9998160004615784,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 40,
+      "gt_text": "黑色妆魂",
+      "pp5_text": "黑色改瑰",
+      "pp5_score": 0.7956258058547974,
+      "match": false,
+      "partial": false
+    },
+    {
+      "index": 41,
+      "gt_text": "审批机构",
+      "pp5_text": "审批机构",
+      "pp5_score": 0.9995188117027283,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 42,
+      "gt_text": "诺戴静斯汉",
+      "pp5_text": "诺克萨斯议会",
+      "pp5_score": 0.8201284408569336,
+      "match": false,
+      "partial": false
+    },
+    {
+      "index": 43,
+      "gt_text": "无此类情况口",
+      "pp5_text": "无此类情况□",
+      "pp5_score": 0.9993886351585388,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 44,
+      "gt_text": "备注",
+      "pp5_text": "备注",
+      "pp5_score": 0.9995795488357544,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 45,
+      "gt_text": "无此类情况口",
+      "pp5_text": "无此类情况□",
+      "pp5_score": 0.9993793368339539,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 46,
+      "gt_text": "所用护照号",
+      "pp5_text": "所用护照号",
+      "pp5_score": 0.9998543858528137,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 47,
+      "gt_text": "Ak43o0v",
+      "pp5_text": "AK4304502",
+      "pp5_score": 0.8915807008743286,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 48,
+      "gt_text": "说明：①普通护照指因私护照，不含公务普通护照。应填写填报时的有效普通护照",
+      "pp5_text": "说明：①普通护照指因私护照，不含公务普通护照，应填写填报时的有效普通护照",
+      "pp5_score": 0.9903538823127747,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 49,
+      "gt_text": "情况，以及失效的普通护照情况。②因私出国应填写截至填报日因私出国的情况。持出",
+      "pp5_text": "情况，以及失效的普通护照情况。②因私出国应填写截至填报日因私出国的情况，持出",
+      "pp5_score": 0.9645735025405884,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 50,
+      "gt_text": "入境通行证因私出国情况需要填报。所到国家填写从出国至回国期间到过的所有国家，",
+      "pp5_text": "入境通行证因私出国情况需要填报，所到国家填写从出国至回国期间到过的所有国家，",
+      "pp5_score": 0.9872598052024841,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 51,
+      "gt_text": "含过境签国家。事由主要包括探亲、访友、学习、就业、学术交流、就医、旅游以及继",
+      "pp5_text": "含过境签国家、事由主要包括探亲、访友、学习、就业、学术交流、就医、旅游以及继",
+      "pp5_score": 0.9852450489997864,
+      "match": false,
+      "partial": true
+    },
+    {
+      "index": 52,
+      "gt_text": "承、接受和处理财产等。",
+      "pp5_text": "承、接受和处理财产等。",
+      "pp5_score": 0.9969733953475952,
+      "match": true,
+      "partial": false
+    },
+    {
+      "index": 53,
+      "gt_text": "2",
+      "pp5_text": "-2-",
+      "pp5_score": 0.806858479976654,
+      "match": false,
+      "partial": true
+    }
+  ]
+}

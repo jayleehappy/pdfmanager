@@ -1,0 +1,16 @@
+{
+  "template": "PDFtemplates",
+  "page": 9,
+  "dpi": 150,
+  "regions": [
+    {
+      "index": 1,
+      "label": "第9页特征区域",
+      "x1": 127,
+      "y1": 1602,
+      "x2": 273,
+      "y2": 1667,
+      "page": 9
+    }
+  ]
+}

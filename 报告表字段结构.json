@@ -1,0 +1,458 @@
+{
+  "report_table_version": "JDJDX",
+  "sections": [
+    {
+      "id": "basic_info",
+      "name": "报告人基本信息",
+      "page": 1,
+      "fields": [
+        {"name": "报告人签名", "type": "string", "required": true},
+        {"name": "单位", "type": "string", "required": true},
+        {"name": "报告日期", "type": "date", "required": true}
+      ]
+    },
+    {
+      "id": "personal_info",
+      "name": "本人基本情况",
+      "page": 5,
+      "fields": [
+        {"name": "姓名", "type": "string", "required": true},
+        {"name": "性别", "type": "string", "required": true, "options": ["男", "女"]},
+        {"name": "民族", "type": "string", "required": true},
+        {"name": "政治面貌", "type": "string", "required": false},
+        {"name": "在职状态", "type": "string", "required": true, "options": ["现职", "免职"]},
+        {"name": "岗位职务", "type": "string", "required": true},
+        {"name": "身份证号码", "type": "string", "required": true, "pattern": "^[0-9]{17}[0-9X]$"},
+        {"name": "JG证号码", "type": "string", "required": false},
+        {"name": "文职人员证号码", "type": "string", "required": false},
+        {"name": "现住址", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "marriage",
+      "name": "本人婚姻情况",
+      "page": 5,
+      "fields": [
+        {"name": "婚姻现状", "type": "string", "required": true, "options": ["未婚", "已婚", "离异", "丧偶"]},
+        {"name": "婚姻变化", "type": "string", "required": true, "options": ["无变化", "有变化"]},
+        {"name": "以往变化情形及时间", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "health",
+      "name": "本人健康状况",
+      "page": 6,
+      "fields": [
+        {"name": "是否身患重大疾病", "type": "string", "required": true, "options": ["是", "否"]},
+        {"name": "疾病名称", "type": "string", "required": false},
+        {"name": "确诊时间", "type": "date", "required": false},
+        {"name": "诊断医疗机构", "type": "string", "required": false},
+        {"name": "治疗康复情况", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "passport",
+      "name": "本人持有护照情况",
+      "page": 6,
+      "multiple": true,
+      "fields": [
+        {"name": "护照号码", "type": "string", "required": false},
+        {"name": "签发日期", "type": "date", "required": false},
+        {"name": "有效期至", "type": "date", "required": false},
+        {"name": "保管机构", "type": "string", "required": false},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "overseas_trip",
+      "name": "本人因私出国情况",
+      "page": 6,
+      "multiple": true,
+      "fields": [
+        {"name": "起止日期_起", "type": "date", "required": false},
+        {"name": "起止日期_止", "type": "date", "required": false},
+        {"name": "所到国家", "type": "string", "required": false},
+        {"name": "事由", "type": "string", "required": false, "options": ["探亲", "访友", "学习", "就业", "学术交流", "就医", "旅游", "继承", "接受和处理财产", "其他"]},
+        {"name": "审批机构", "type": "string", "required": false},
+        {"name": "所用护照号", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "hk_mo_tw_pass",
+      "name": "往来港澳台通行证",
+      "page": 7,
+      "multiple": true,
+      "fields": [
+        {"name": "证件名称", "type": "string", "required": false, "options": ["往来港澳通行证", "大陆居民往来台湾通行证"]},
+        {"name": "证件号码", "type": "string", "required": false},
+        {"name": "有效期限_起", "type": "date", "required": false},
+        {"name": "有效期限_止", "type": "date", "required": false},
+        {"name": "保管机构", "type": "string", "required": false},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "hk_mo_tw_trip",
+      "name": "因私往来港澳台情况",
+      "page": 7,
+      "multiple": true,
+      "fields": [
+        {"name": "起止日期_起", "type": "date", "required": false},
+        {"name": "起止日期_止", "type": "date", "required": false},
+        {"name": "所到地区", "type": "string", "required": false, "options": ["香港", "澳门", "台湾"]},
+        {"name": "事由", "type": "string", "required": false},
+        {"name": "审批机构", "type": "string", "required": false},
+        {"name": "所用证件号码", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "spouse",
+      "name": "配偶基本情况",
+      "page": 7,
+      "fields": [
+        {"name": "配偶姓名", "type": "string", "required": false},
+        {"name": "配偶工作单位", "type": "string", "required": false},
+        {"name": "配偶现任职务", "type": "string", "required": false},
+        {"name": "配偶单位性质", "type": "string", "required": false, "options": ["党政机关", "事业单位", "国有企业", "军队", "学生", "个体工商户", "私营企业", "外资企业", "国境外机构", "其他"]},
+        {"name": "配偶政治面貌", "type": "string", "required": false},
+        {"name": "配偶是否在国境外", "type": "string", "required": false, "options": ["是", "否"]},
+        {"name": "配偶身份证号码", "type": "string", "required": false},
+        {"name": "配偶备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "children",
+      "name": "子女及其配偶从业情况",
+      "page": "7-9",
+      "multiple": true,
+      "fields": [
+        {"name": "子女姓名", "type": "string", "required": false},
+        {"name": "子女关系", "type": "string", "required": false, "options": ["儿子", "女儿"]},
+        {"name": "是否共同生活", "type": "string", "required": false, "options": ["是", "否"]},
+        {"name": "子女工作单位", "type": "string", "required": false},
+        {"name": "子女现任职务", "type": "string", "required": false},
+        {"name": "子女单位性质", "type": "string", "required": false},
+        {"name": "子女政治面貌", "type": "string", "required": false},
+        {"name": "子女是否在国境外", "type": "string", "required": false, "options": ["是", "否"]},
+        {"name": "子女身份证号码", "type": "string", "required": false},
+        {"name": "子女备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "family_immigration",
+      "name": "配偶子女移居国境外情况",
+      "page": "9-10",
+      "multiple": true,
+      "fields": [
+        {"name": "移居人姓名", "type": "string", "required": false},
+        {"name": "移居国家_地区", "type": "string", "required": false},
+        {"name": "现居住城市", "type": "string", "required": false},
+        {"name": "移居证件号码", "type": "string", "required": false},
+        {"name": "移居类别", "type": "string", "required": false, "options": ["外国国籍", "永久居留资格", "长期居留许可"]},
+        {"name": "移居时间", "type": "date", "required": false},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "family_overseas_living",
+      "name": "配偶子女国境外工作学习生活",
+      "page": 10,
+      "multiple": true,
+      "fields": [
+        {"name": "姓名", "type": "string", "required": false},
+        {"name": "所在国家_地区_城市", "type": "string", "required": false},
+        {"name": "出国境情形", "type": "string", "required": false},
+        {"name": "起止时间_起", "type": "date", "required": false},
+        {"name": "起止时间_止", "type": "date", "required": false},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "family_legal",
+      "name": "配偶子女被留置或追究刑责",
+      "page": 10,
+      "multiple": true,
+      "fields": [
+        {"name": "姓名", "type": "string", "required": false},
+        {"name": "留置或被追究时间", "type": "date", "required": false},
+        {"name": "留置或被追究原因", "type": "string", "required": false},
+        {"name": "处理阶段", "type": "string", "required": false, "options": ["留置", "立案侦查", "审查起诉", "刑事审判", "刑罚执行", "执行完毕", "其他"]},
+        {"name": "处理结果", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "salary",
+      "name": "本人工资奖金津贴补贴",
+      "page": 11,
+      "fields": [
+        {"name": "工资", "type": "decimal", "required": false, "unit": "万元/年"},
+        {"name": "奖金", "type": "decimal", "required": false, "unit": "万元/年"},
+        {"name": "其他", "type": "decimal", "required": false, "unit": "万元/年"},
+        {"name": "合计", "type": "decimal", "required": false, "unit": "万元/年"},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "labor_income",
+      "name": "本人劳务所得",
+      "page": 11,
+      "fields": [
+        {"name": "讲学", "type": "decimal", "required": false, "unit": "万元/年"},
+        {"name": "写作", "type": "decimal", "required": false, "unit": "万元/年"},
+        {"name": "咨询", "type": "decimal", "required": false, "unit": "万元/年"},
+        {"name": "审稿", "type": "decimal", "required": false, "unit": "万元/年"},
+        {"name": "书画", "type": "decimal", "required": false, "unit": "万元/年"},
+        {"name": "其他", "type": "decimal", "required": false, "unit": "万元/年"},
+        {"name": "合计", "type": "decimal", "required": false, "unit": "万元/年"},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "domestic_property",
+      "name": "境内房产情况",
+      "page": "11-12",
+      "multiple": true,
+      "fields": [
+        {"name": "产权人姓名", "type": "string", "required": false},
+        {"name": "房产来源", "type": "string", "required": false, "options": ["购买", "继承", "接受赠与", "个人自建", "其他"]},
+        {"name": "具体地址", "type": "string", "required": false},
+        {"name": "建筑面积", "type": "decimal", "required": false, "unit": "平方米"},
+        {"name": "房产性质", "type": "string", "required": false, "options": ["商品房", "军队安置类住房", "地方保障性住房", "车库/车位/储藏间", "其他"]},
+        {"name": "功能类型", "type": "string", "required": false},
+        {"name": "交易时间_年", "type": "int", "required": false},
+        {"name": "交易时间_月", "type": "int", "required": false},
+        {"name": "交易价格", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "付款方式", "type": "string", "required": false, "options": ["全款", "贷款"]},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "overseas_property",
+      "name": "境外房产情况",
+      "page": 13,
+      "multiple": true,
+      "fields": [
+        {"name": "产权人姓名", "type": "string", "required": false},
+        {"name": "来源", "type": "string", "required": false, "options": ["购买", "继承", "接受赠与", "其他"]},
+        {"name": "国家_地区", "type": "string", "required": false},
+        {"name": "具体地址", "type": "string", "required": false},
+        {"name": "面积", "type": "decimal", "required": false, "unit": "平方米"},
+        {"name": "购买时间_年", "type": "int", "required": false},
+        {"name": "购买时间_月", "type": "int", "required": false},
+        {"name": "币种", "type": "string", "required": false},
+        {"name": "交易价格", "type": "decimal", "required": false, "unit": "万"},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "domestic_stock",
+      "name": "境内股票",
+      "page": "13-14",
+      "multiple": true,
+      "fields": [
+        {"name": "持有人姓名", "type": "string", "required": false},
+        {"name": "股票名称", "type": "string", "required": false},
+        {"name": "股票代码", "type": "string", "required": false},
+        {"name": "持股数量", "type": "decimal", "required": false, "unit": "股"},
+        {"name": "填报前一交易日市值", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "overseas_stock",
+      "name": "境外股票",
+      "page": 14,
+      "multiple": true,
+      "fields": [
+        {"name": "持有人姓名", "type": "string", "required": false},
+        {"name": "股票名称", "type": "string", "required": false},
+        {"name": "股票代码", "type": "string", "required": false},
+        {"name": "国家_地区", "type": "string", "required": false},
+        {"name": "持股数量", "type": "decimal", "required": false, "unit": "股"},
+        {"name": "币种", "type": "string", "required": false},
+        {"name": "填报前一交易日市值", "type": "decimal", "required": false, "unit": "万"},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "domestic_fund",
+      "name": "境内基金",
+      "page": 15,
+      "multiple": true,
+      "fields": [
+        {"name": "持有人姓名", "type": "string", "required": false},
+        {"name": "基金名称", "type": "string", "required": false},
+        {"name": "基金代码", "type": "string", "required": false},
+        {"name": "基金份额", "type": "decimal", "required": false, "unit": "份"},
+        {"name": "填报前一交易日净值", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "overseas_fund",
+      "name": "境外基金",
+      "page": 16,
+      "multiple": true,
+      "fields": [
+        {"name": "持有人姓名", "type": "string", "required": false},
+        {"name": "基金名称", "type": "string", "required": false},
+        {"name": "基金代码", "type": "string", "required": false},
+        {"name": "国家_地区", "type": "string", "required": false},
+        {"name": "基金份额", "type": "decimal", "required": false, "unit": "份"},
+        {"name": "币种", "type": "string", "required": false},
+        {"name": "填报前一交易日净值", "type": "decimal", "required": false, "unit": "万"},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "domestic_insurance",
+      "name": "境内投资型保险",
+      "page": "16-17",
+      "multiple": true,
+      "fields": [
+        {"name": "投保人姓名", "type": "string", "required": false},
+        {"name": "保险产品全称", "type": "string", "required": false},
+        {"name": "保单号", "type": "string", "required": false},
+        {"name": "保险公司名称", "type": "string", "required": false},
+        {"name": "累计缴纳保费_投资金", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "overseas_insurance",
+      "name": "境外投资型保险",
+      "page": "17-18",
+      "multiple": true,
+      "fields": [
+        {"name": "投保人姓名", "type": "string", "required": false},
+        {"name": "保险产品全称", "type": "string", "required": false},
+        {"name": "保单号", "type": "string", "required": false},
+        {"name": "国家_地区", "type": "string", "required": false},
+        {"name": "保险公司名称", "type": "string", "required": false},
+        {"name": "币种", "type": "string", "required": false},
+        {"name": "累计缴纳保费_投资金", "type": "decimal", "required": false, "unit": "万"},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "family_business",
+      "name": "配偶子女投资企业情况",
+      "page": "18-19",
+      "multiple": true,
+      "fields": [
+        {"name": "姓名", "type": "string", "required": false},
+        {"name": "统一社会信用代码_注册号", "type": "string", "required": false},
+        {"name": "企业名称", "type": "string", "required": false},
+        {"name": "企业类型", "type": "string", "required": false, "options": ["股份有限公司", "有限责任公司", "个体工商户", "个人独资企业", "合伙企业", "国境外企业", "其他"]},
+        {"name": "注册资本", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "企业状态", "type": "string", "required": false, "options": ["存续", "吊销但未注销", "撤销", "迁出", "其他"]},
+        {"name": "是否为股东", "type": "string", "required": false, "options": ["是", "否"]},
+        {"name": "个人认缴出资额", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "投资时间_年", "type": "int", "required": false},
+        {"name": "投资时间_月", "type": "int", "required": false},
+        {"name": "个人认缴出资比例", "type": "decimal", "required": false, "unit": "%"},
+        {"name": "个人实缴出资额", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "是否担任高级职务", "type": "string", "required": false, "options": ["是", "否"]},
+        {"name": "担任的高级职务名称", "type": "string", "required": false},
+        {"name": "担任高级职务的时间_年", "type": "int", "required": false},
+        {"name": "担任高级职务的时间_月", "type": "int", "required": false},
+        {"name": "认定规范情况", "type": "string", "required": false, "options": ["已规范", "正在规范", "尚未规范"]},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "family_agency",
+      "name": "配偶子女开办有偿社会中介机构",
+      "page": "19-20",
+      "multiple": true,
+      "fields": [
+        {"name": "姓名", "type": "string", "required": false},
+        {"name": "执业资格名称", "type": "string", "required": false},
+        {"name": "执业证号", "type": "string", "required": false},
+        {"name": "开办或所在机构名称", "type": "string", "required": false},
+        {"name": "统一社会信用代码_注册号", "type": "string", "required": false},
+        {"name": "机构类型", "type": "string", "required": false, "options": ["律师事务所", "会计师事务所", "财会咨询公司", "税务师事务所", "资产评估机构", "商标专利代理事务所", "国境外有偿社会中介", "其他"]},
+        {"name": "注册资本_资金数额", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "机构状态", "type": "string", "required": false, "options": ["正常执业", "停业整顿", "吊销", "其他"]},
+        {"name": "是否为机构股东", "type": "string", "required": false, "options": ["是", "否"]},
+        {"name": "个人认缴出资额", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "入股_入伙时间_年", "type": "int", "required": false},
+        {"name": "入股_入伙时间_月", "type": "int", "required": false},
+        {"name": "个人认缴出资比例", "type": "decimal", "required": false, "unit": "%"},
+        {"name": "个人实缴出资额", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "是否在该机构从业", "type": "string", "required": false, "options": ["是", "否"]},
+        {"name": "担任的职务名称", "type": "string", "required": false},
+        {"name": "入职时间_年", "type": "int", "required": false},
+        {"name": "入职时间_月", "type": "int", "required": false},
+        {"name": "认定规范情况", "type": "string", "required": false, "options": ["已规范", "正在规范", "尚未规范"]},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "family_private_fund",
+      "name": "配偶子女投资私募股权基金",
+      "page": "20-21",
+      "multiple": true,
+      "fields": [
+        {"name": "姓名", "type": "string", "required": false},
+        {"name": "私募基金产品名称", "type": "string", "required": false},
+        {"name": "私募基金编码", "type": "string", "required": false},
+        {"name": "基金总实缴金额", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "个人实缴金额", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "基金投向", "type": "string", "required": false},
+        {"name": "基金合同签署日", "type": "date", "required": false},
+        {"name": "基金合同约定到期日", "type": "date", "required": false},
+        {"name": "认定规范情况", "type": "string", "required": false, "options": ["已规范", "正在规范", "尚未规范"]},
+        {"name": "基金管理人名称", "type": "string", "required": false},
+        {"name": "基金管理人登记编号", "type": "string", "required": false},
+        {"name": "是否为实际控制人", "type": "string", "required": false, "options": ["是", "否"]},
+        {"name": "是否为股东_合伙人", "type": "string", "required": false, "options": ["是", "否"]},
+        {"name": "认缴金额", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "认缴比例", "type": "decimal", "required": false, "unit": "%"},
+        {"name": "认缴时间_年", "type": "int", "required": false},
+        {"name": "认缴时间_月", "type": "int", "required": false},
+        {"name": "实缴金额", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "是否担任高级职务", "type": "string", "required": false, "options": ["是", "否"]},
+        {"name": "担任的高级职务名称", "type": "string", "required": false},
+        {"name": "担任高级职务的时间_年", "type": "int", "required": false},
+        {"name": "担任高级职务的时间_月", "type": "int", "required": false},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "overseas_deposit",
+      "name": "境外存款",
+      "page": 21,
+      "multiple": true,
+      "fields": [
+        {"name": "存款人姓名", "type": "string", "required": false},
+        {"name": "存款国家_地区_城市", "type": "string", "required": false},
+        {"name": "开户银行_金融机构全称", "type": "string", "required": false},
+        {"name": "账号", "type": "string", "required": false},
+        {"name": "币种", "type": "string", "required": false},
+        {"name": "金额", "type": "decimal", "required": false, "unit": "万元"},
+        {"name": "备注", "type": "string", "required": false}
+      ]
+    },
+    {
+      "id": "other_matters",
+      "name": "其他事项",
+      "page": 22,
+      "fields": [
+        {"name": "其他事项内容", "type": "string", "required": false},
+        {"name": "本人承诺签名", "type": "string", "required": true}
+      ]
+    }
+  ],
+  "comparison_mapping": {
+    "房产": {"report_sections": ["domestic_property", "overseas_property"], "key_fields": ["产权人姓名", "具体地址", "建筑面积"]},
+    "保险": {"report_sections": ["domestic_insurance", "overseas_insurance"], "key_fields": ["投保人姓名", "保单号", "保险公司名称", "累计缴纳保费_投资金"]},
+    "基金": {"report_sections": ["domestic_fund", "overseas_fund"], "key_fields": ["持有人姓名", "基金名称", "基金代码", "基金份额", "填报前一交易日净值"]},
+    "护照": {"report_sections": ["passport"], "key_fields": ["护照号码"]},
+    "通行证": {"report_sections": ["hk_mo_tw_pass"], "key_fields": ["证件号码"]},
+    "出入境": {"report_sections": ["overseas_trip", "hk_mo_tw_trip"], "key_fields": ["起止日期_起", "起止日期_止", "所到国家", "所到地区"]},
+    "法人": {"report_sections": ["family_business"], "key_fields": ["姓名", "企业名称", "统一社会信用代码_注册号"]},
+    "企业主要管理人员": {"report_sections": ["family_business"], "key_fields": ["姓名", "企业名称", "担任的高级职务名称"]},
+    "股东": {"report_sections": ["family_business"], "key_fields": ["姓名", "企业名称", "个人认缴出资额", "个人认缴出资比例"]}
+  }
+}

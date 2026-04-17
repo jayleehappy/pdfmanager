@@ -1,0 +1,209 @@
+{
+  "model": "PaddleOCR-VL v1",
+  "device": "cpu",
+  "load_time_s": 32.8,
+  "rec_time_s": 114.2,
+  "layout_boxes": [
+    {
+      "cls_id": 17,
+      "label": "paragraph_title",
+      "score": 0.7387198805809021,
+      "coordinate": [
+        96,
+        82,
+        220,
+        98
+      ],
+      "order": 1
+    },
+    {
+      "cls_id": 21,
+      "label": "table",
+      "score": 0.9778212308883667,
+      "coordinate": [
+        65,
+        100,
+        530,
+        238
+      ],
+      "order": null
+    },
+    {
+      "cls_id": 22,
+      "label": "text",
+      "score": 0.8589268922805786,
+      "coordinate": [
+        68,
+        242,
+        528,
+        323
+      ],
+      "order": 2
+    },
+    {
+      "cls_id": 17,
+      "label": "paragraph_title",
+      "score": 0.693979799747467,
+      "coordinate": [
+        97,
+        340,
+        347,
+        357
+      ],
+      "order": 3
+    },
+    {
+      "cls_id": 15,
+      "label": "inline_formula",
+      "score": 0.5210731029510498,
+      "coordinate": [
+        73,
+        440,
+        149,
+        460
+      ],
+      "order": 4
+    },
+    {
+      "cls_id": 21,
+      "label": "table",
+      "score": 0.9790555834770203,
+      "coordinate": [
+        65,
+        358,
+        532,
+        668
+      ],
+      "order": null
+    },
+    {
+      "cls_id": 15,
+      "label": "inline_formula",
+      "score": 0.5390923619270325,
+      "coordinate": [
+        442,
+        575,
+        520,
+        595
+      ],
+      "order": 5
+    },
+    {
+      "cls_id": 22,
+      "label": "text",
+      "score": 0.659531831741333,
+      "coordinate": [
+        68,
+        673,
+        529,
+        752
+      ],
+      "order": 6
+    },
+    {
+      "cls_id": 16,
+      "label": "number",
+      "score": 0.8367874026298523,
+      "coordinate": [
+        88,
+        780,
+        106,
+        794
+      ],
+      "order": 7
+    }
+  ],
+  "parsing_res": [
+    {
+      "block_label": "paragraph_title",
+      "block_content": "2. 本人的健康状况",
+      "block_bbox": [
+        96,
+        82,
+        220,
+        98
+      ],
+      "block_id": 0,
+      "block_order": 1,
+      "group_id": 0
+    },
+    {
+      "block_label": "table",
+      "block_content": "<table><tr><td>是否身患重大疾病</td><td>先后于2430、2431、2432年在诺克萨斯总医院接受锻炼。锻炼剑手术，目前健康状况良好。</td></tr></table>",
+      "block_bbox": [
+        65,
+        100,
+        530,
+        238
+      ],
+      "block_id": 1,
+      "block_order": null,
+      "group_id": 1
+    },
+    {
+      "block_label": "text",
+      "block_content": "说明：应填写本人既往患重大疾病和实施重大手术情况，新发重大疾病和诊治情况，以及本人认为需要报告的健康状况方面其他情况。重大疾病是指患恶性肿瘤、严重心脑血管疾病、重大传染性疾病和其他可能造成终身残疾的病伤，需要进行重要器官移植的疾病，以及严重的心理和精神疾病等。存在上述情况的，应如实填写疾病名称、确诊时间、诊断医疗机构、治疗康复情况等；没有需要报告内容的，在表格内填写“无”。",
+      "block_bbox": [
+        68,
+        242,
+        528,
+        323
+      ],
+      "block_id": 2,
+      "block_order": 2,
+      "group_id": 2
+    },
+    {
+      "block_label": "paragraph_title",
+      "block_content": "3. 本人持有普通护照和因私出国的情况",
+      "block_bbox": [
+        97,
+        340,
+        347,
+        357
+      ],
+      "block_id": 3,
+      "block_order": 3,
+      "group_id": 3
+    },
+    {
+      "block_label": "table",
+      "block_content": "<table><tr><td colspan=\"6\">持有普通护照的情况 无此类情况□</td></tr><tr><td>护照号</td><td>签发日期</td><td>有效期至</td><td>保管机构</td><td>备注</td><td></td></tr><tr><td>AK4304502</td><td>248年3月1日</td><td>2500年3月1日</td><td>黑色玫瑰</td><td></td><td></td></tr><tr><td></td><td>年 月 日</td><td>年 月 日</td><td></td><td></td><td></td></tr><tr><td colspan=\"6\">因私出国的情况 无此类情况□</td></tr><tr><td>起止日期</td><td>所到国家</td><td>事 由</td><td>审批机构</td><td colspan=\"2\">所用护照号</td></tr><tr><td>起:248年12月3日至:2413年9月6日</td><td>晴影岛</td><td>旅游</td><td colspan=\"3\">洛克萨斯议会AK4304502</td></tr><tr><td>起: 年 月 日至: 年 月 日</td><td></td><td></td><td></td><td colspan=\"2\"></td></tr><tr><td>起: 年 月 日至: 年 月 日</td><td></td><td></td><td></td><td colspan=\"2\"></td></tr></table>",
+      "block_bbox": [
+        65,
+        358,
+        532,
+        668
+      ],
+      "block_id": 4,
+      "block_order": null,
+      "group_id": 4
+    },
+    {
+      "block_label": "text",
+      "block_content": "说明：①普通护照指因私护照，不含公务普通护照。应填写填报时的有效普通护照情况，以及失效的普通护照情况。②因私出国应填写截至填报日因私出国的情况。持出入境通行证因私出国情况需要填报。所到国家填写从出国至回国期间到过的所有国家，含过境签国家。事由主要包括探亲、访友、学习、就业、学术交流、就医、旅游以及继承、接受和处理财产等。",
+      "block_bbox": [
+        68,
+        673,
+        529,
+        752
+      ],
+      "block_id": 5,
+      "block_order": 4,
+      "group_id": 5
+    },
+    {
+      "block_label": "number",
+      "block_content": "2",
+      "block_bbox": [
+        88,
+        780,
+        106,
+        794
+      ],
+      "block_id": 6,
+      "block_order": null,
+      "group_id": 6
+    }
+  ]
+}

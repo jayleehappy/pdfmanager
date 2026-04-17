@@ -1,0 +1,16 @@
+{
+  "template": "PDFtemplates",
+  "page": 3,
+  "dpi": 150,
+  "regions": [
+    {
+      "index": 1,
+      "label": "第3页特征区域",
+      "x1": 502,
+      "y1": 150,
+      "x2": 729,
+      "y2": 232,
+      "page": 3
+    }
+  ]
+}

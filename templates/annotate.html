@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模板区域标注工具</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .toolbar {
+      background: #181825;
+      border-bottom: 1px solid #313244;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .toolbar h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #cdd6f4;
+      margin-right: auto;
+    }
+    .toolbar h2 span { font-size: 11px; color: #6c7086; font-weight: 400; margin-left: 8px; }
+    .btn {
+      padding: 5px 12px;
+      border-radius: 5px;
+      border: 1px solid #45475a;
+      background: #313244;
+      color: #cdd6f4;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn:hover { background: #45475a; }
+    .btn.primary { background: #89b4fa; color: #1e1e2e; border-color: #89b4fa; font-weight: 600; }
+    .btn.primary:hover { background: #b4befe; }
+    .btn.danger { border-color: #f38ba8; color: #f38ba8; }
+    .btn.danger:hover { background: #f38ba866; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* 模板选择器 */
+    #templateSelect {
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: 1px solid #45475a;
+      background: #313244;
+      color: #cdd6f4;
+      font-size: 12px;
+    }
+
+    .page-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .page-nav input[type="number"] {
+      width: 56px; padding: 4px 6px;
+      border-radius: 5px; border: 1px solid #45475a;
+      background: #313244; color: #cdd6f4;
+      text-align: center; font-size: 12px;
+    }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #6c7086; display: inline-block; margin-right: 4px;
+    }
+    .status-dot.saved { background: #a6e3a1; }
+    .status-dot.annotated { background: #f9e2af; }
+
+    .workspace { display: flex; flex: 1; overflow: hidden; }
+
+    .canvas-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      overflow: auto;
+      background: #11111b;
+    }
+    .loading {
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px; color: #6c7086;
+    }
+    .spinner {
+      width: 22px; height: 22px;
+      border: 3px solid #313244; border-top-color: #89b4fa;
+      border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .img-container {
+      position: relative; display: inline-block; line-height: 0;
+    }
+    #pdfCanvas {
+      display: block; max-width: 100%;
+      border: 2px solid #313244; border-radius: 4px; cursor: crosshair;
+    }
+    #_overlay {
+      position: absolute; top: 0; left: 0;
+      pointer-events: none; border-radius: 4px;
+    }
+    .canvas-hint { margin-top: 8px; font-size: 11px; color: #6c7086; }
+
+    .side-panel {
+      width: 280px;
+      background: #181825;
+      border-left: 1px solid #313244;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 10px 14px; font-size: 12px; font-weight: 600;
+      border-bottom: 1px solid #313244; color: #89b4fa;
+    }
+    .region-list { flex: 1; overflow-y: auto; padding: 8px; }
+    .region-item {
+      background: #1e1e2e; border: 1px solid #313244;
+      border-radius: 7px; padding: 8px 10px; margin-bottom: 6px;
+      position: relative;
+    }
+    .region-item.sel { border-color: #89b4fa; box-shadow: 0 0 0 1px #89b4fa44; }
+    .region-item-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .region-num {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #89b4fa; color: #1e1e2e;
+      font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .region-label-input {
+      flex: 1; padding: 3px 7px; border-radius: 4px;
+      border: 1px solid #313244; background: #313244;
+      color: #cdd6f4; font-size: 12px;
+    }
+    .region-label-input:focus { outline: none; border-color: #89b4fa; }
+    .region-del { background: none; border: none; color: #6c7086; cursor: pointer; font-size: 13px; padding: 2px; }
+    .region-del:hover { color: #f38ba8; }
+    .region-meta { font-size: 10px; color: #6c7086; }
+
+    .label-presets {
+      padding: 8px 10px; border-top: 1px solid #313244; display: flex; flex-wrap: wrap; gap: 3px;
+    }
+    .preset-tag {
+      padding: 2px 7px; border-radius: 4px;
+      background: #313244; color: #a6e3a1;
+      font-size: 10px; cursor: pointer; border: 1px solid transparent;
+    }
+    .preset-tag:hover { border-color: #a6e3a1; }
+
+    .info-bar {
+      background: #181825; border-top: 1px solid #313244;
+      padding: 6px 16px; font-size: 11px; color: #6c7086;
+      display: flex; gap: 16px;
+    }
+
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: #00000088; z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #1e1e2e; border: 1px solid #45475a;
+      border-radius: 10px; padding: 20px; width: 560px;
+      max-height: 80vh; overflow-y: auto;
+    }
+    .modal h3 { margin-bottom: 12px; color: #cdd6f4; }
+    .modal pre {
+      background: #11111b; border: 1px solid #313244;
+      border-radius: 6px; padding: 10px; font-size: 11px;
+      color: #a6e3a1; overflow-x: auto; max-height: 360px;
+    }
+    .modal-actions { margin-top: 12px; display: flex; gap: 8px; justify-content: flex-end; }
+  </style>
+</head>
+<body>
+
+<div class="toolbar">
+  <h2>模板区域标注工具 <span id="statusText"><span class="status-dot" id="statusDot"></span>未连接</span></h2>
+
+  <!-- 模板选择器 -->
+  <select id="templateSelect" onchange="loadTemplate(this.value)">
+    <option value="">加载中...</option>
+  </select>
+
+  <div class="page-nav">
+    <button class="btn" id="prevBtn" onclick="prevPage()">◀</button>
+    <span style="font-size:12px">第</span>
+    <input type="number" id="pageInput" value="1" min="1" onchange="gotoPage(this.value)">
+    <span style="font-size:12px">/ <span id="totalPages">?</span></span>
+    <button class="btn" id="nextBtn" onclick="nextPage()">▶</button>
+  </div>
+
+  <button class="btn" onclick="zoomCanvas(-0.2)">➖</button>
+  <span id="zoomLabel" style="font-size:11px;color:#6c7086">100%</span>
+  <button class="btn" onclick="zoomCanvas(0.2)">➕</button>
+
+  <button class="btn" onclick="clearCurrentPage()">清空本页</button>
+  <button class="btn primary" onclick="saveCurrentPage()">💾 保存</button>
+  <button class="btn primary" onclick="showExport()">📤 导出</button>
+</div>
+
+<div class="workspace">
+  <div class="canvas-wrap" id="canvasWrap">
+    <div class="loading" id="loading"><div class="spinner"></div>加载中...</div>
+    <div class="img-container" id="imgContainer" style="display:none">
+      <img id="pdfCanvas" />
+    </div>
+    <div class="canvas-hint" id="canvasHint">拖动绘制区域 · 点击选中 · Del 删除选中</div>
+  </div>
+
+  <div class="side-panel">
+    <div class="panel-header">📋 第 <span id="regionPageNum">?</span> 页（共 <span id="regionCount">0</span> 个）</div>
+    <div class="region-list" id="regionList">
+      <div style="padding:20px;color:#6c7086;font-size:12px;text-align:center;">
+        暂无标注<br><span style="font-size:10px">在左侧画布上绘制矩形框</span>
+      </div>
+    </div>
+    <div class="label-presets">
+      <span style="font-size:10px;color:#6c7086;width:100%;">快速标签：</span>
+      <span class="preset-tag" onclick="setPresetLabel('姓名')">姓名</span>
+      <span class="preset-tag" onclick="setPresetLabel('职务')">职务</span>
+      <span class="preset-tag" onclick="setPresetLabel('工作单位')">工作单位</span>
+      <span class="preset-tag" onclick="setPresetLabel('证件号码')">证件号码</span>
+      <span class="preset-tag" onclick="setPresetLabel('日期')">日期</span>
+      <span class="preset-tag" onclick="setPresetLabel('配偶姓名')">配偶姓名</span>
+      <span class="preset-tag" onclick="setPresetLabel('配偶单位')">配偶单位</span>
+      <span class="preset-tag" onclick="setPresetLabel('房产地址')">房产地址</span>
+      <span class="preset-tag" onclick="setPresetLabel('建筑面积')">建筑面积</span>
+      <span class="preset-tag" onclick="setPresetLabel('股票名称')">股票名称</span>
+      <span class="preset-tag" onclick="setPresetLabel('持股数量')">持股数量</span>
+      <span class="preset-tag" onclick="setPresetLabel('基金名称')">基金名称</span>
+      <span class="preset-tag" onclick="setPresetLabel('保险名称')">保险名称</span>
+      <span class="preset-tag" onclick="setPresetLabel('投资企业')">投资企业</span>
+      <span class="preset-tag" onclick="setPresetLabel('备注')">备注</span>
+    </div>
+  </div>
+</div>
+
+<div class="info-bar">
+  <span>🖱️ 拖动=绘制 | 单击=选中 | Del=删除</span>
+  <span id="infoProgress"></span>
+</div>
+
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <h3>📤 标注配置导出</h3>
+    <pre id="exportPreview">加载中...</pre>
+    <div class="modal-actions">
+      <button class="btn" onclick="document.getElementById('exportModal').classList.remove('show')">关闭</button>
+      <button class="btn primary" onclick="downloadJson()">💾 下载 JSON</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── 状态 ───────────────────────────────────────────
+const API_BASE = '/api/annotate';
+let currentTemplate = 'PDFtemplates';
+let currentPage = 1;
+let totalPages = 0;
+let imgWidth = 0, imgHeight = 0;
+let zoom = 1.0;
+let regions = [];
+let selRegionIndex = -1;
+let isDirty = false;
+let drawState = null;
+let _hasMoved = false;
+let pageAnnotated = false;  // 本页是否有标注
+
+// ─── 模板加载 ───────────────────────────────────────
+async function loadTemplate(name) {
+  currentTemplate = name;
+  const r = await fetch(`${API_BASE}/template/${name}/manifest`);
+  if (!r.ok) { alert('加载模板失败'); return; }
+  const manifest = await r.json();
+  totalPages = manifest.effective_pages;
+
+  // 填充下拉框状态
+  const annotatedPages = Object.entries(manifest.pages)
+    .filter(([, v]) => v.annotated).map(([k]) => parseInt(k));
+
+  document.getElementById('totalPages').textContent = totalPages;
+  document.getElementById('statusDot').className = 'status-dot';
+  document.getElementById('statusText').innerHTML =
+    `<span class="status-dot"></span>${name} · ${totalPages}页 · ${annotatedPages.length}页已标注`;
+
+  await loadPage(1);
+}
+
+async function init() {
+  // 加载模板列表
+  const r = await fetch(`${API_BASE}/templates`);
+  const d = await r.json();
+  const sel = document.getElementById('templateSelect');
+  sel.innerHTML = '';
+  for (const t of d.templates) {
+    sel.innerHTML += `<option value="${t.name}">${t.name} (${t.effective_pages}页/已标${t.annotated_pages}页)</option>`;
+  }
+  if (d.templates.length > 0) {
+    loadTemplate(d.templates[0].name);
+  }
+}
+
+// ─── 页加载 ─────────────────────────────────────────
+async function loadPage(pageNum) {
+  if (isDirty && !confirm('当前页有未保存的修改，是否放弃？')) return;
+  showLoading(true);
+
+  try {
+    // 并行获取图像和区域数据
+    const [imgRes, regionsRes] = await Promise.all([
+      fetch(`${API_BASE}/template/${currentTemplate}/page/${pageNum}`),
+      fetch(`${API_BASE}/template/${currentTemplate}/page/${pageNum}/regions`)
+    ]);
+
+    if (!imgRes.ok) throw new Error(`图像加载失败: ${imgRes.status}`);
+    if (!regionsRes.ok) throw new Error(`区域加载失败: ${regionsRes.status}`);
+
+    const imgData = await imgRes.json();
+    const regionsData = await regionsRes.json();
+
+    imgWidth = imgData.width;
+    imgHeight = imgData.height;
+
+    // 更新 regions（立即在右侧列表显示）
+    const rawRegions = regionsData.regions || [];
+    regions = rawRegions.map(r => ({
+      index: r.index, label: r.label || '',
+      x1: r.x1, y1: r.y1, x2: r.x2, y2: r.y2
+    }));
+    selRegionIndex = -1;
+    isDirty = false;
+    pageAnnotated = regions.length > 0;
+
+    // 先更新列表和状态
+    updateStatusBar();
+    updateRegionList();
+
+    // 设置图像并显示
+    const imgEl = document.getElementById('pdfCanvas');
+    imgEl.style.width = (imgWidth * zoom) + 'px';
+    imgEl.style.height = (imgHeight * zoom) + 'px';
+    imgEl.src = `data:image/png;base64,${imgData.image}`;
+
+    imgEl.onload = () => {
+      showLoading(false);
+      document.getElementById('imgContainer').style.display = 'inline-block';
+      const cv = document.getElementById('_overlay');
+      if (cv) cv.remove();
+      drawAllRegions();
+    };
+    imgEl.onerror = () => {
+      showLoading(false);
+      alert('图像加载失败');
+    };
+
+    // 即使图像还没加载完，也隐藏 loading（base64 图像通常立即可用）
+    showLoading(false);
+    document.getElementById('imgContainer').style.display = 'inline-block';
+    drawAllRegions();
+
+  } catch (e) {
+    console.error('loadPage 错误:', e);
+    showLoading(false);
+    return;
+  }
+
+  currentPage = pageNum;
+  document.getElementById('pageInput').value = pageNum;
+  updateButtons();
+  document.getElementById('infoProgress').textContent = '';
+}
+
+async function loadRegions(pageNum) {
+  try {
+    const d = await fetch(`${API_BASE}/template/${currentTemplate}/page/${pageNum}/regions`).then(r => r.json());
+    regions = (d.regions || []).map(r => ({...r}));
+    selRegionIndex = -1;
+    isDirty = false;
+    pageAnnotated = regions.length > 0;
+    updateStatusBar();
+    updateRegionList();
+    drawAllRegions();
+  } catch (e) {
+    console.error('加载区域失败:', e);
+  }
+}
+
+function updateStatusBar() {
+  const dotEl = document.getElementById('statusDot');
+  if (!dotEl) { console.warn('statusDot not found'); return; }
+  const dot = pageAnnotated ? 'annotated' : (isDirty ? '' : 'saved');
+  dotEl.className = `status-dot ${dot}`;
+}
+
+function showLoading(v) {
+  document.getElementById('loading').style.display = v ? 'flex' : 'none';
+}
+
+// ─── overlay 初始化（设置尺寸后再画）────────────────
+function initOverlayAndDraw() {
+  const el = document.getElementById('pdfCanvas');
+  el.style.width = (imgWidth * zoom) + 'px';
+  el.style.height = (imgHeight * zoom) + 'px';
+  // 强制重新获取尺寸
+  const dw = el.getBoundingClientRect().width;
+  const dh = el.getBoundingClientRect().height;
+  let cv = document.getElementById('_overlay');
+  if (!cv) {
+    cv = document.createElement('canvas');
+    cv.id = '_overlay';
+    document.getElementById('imgContainer').appendChild(cv);
+  }
+  cv.style.width = dw + 'px';
+  cv.style.height = dh + 'px';
+  cv.width = Math.round(dw);
+  cv.height = Math.round(dh);
+}
+
+function overlayW() { return Math.round(imgWidth * zoom); }
+function overlayH() { return Math.round(imgHeight * zoom); }
+
+// 图像坐标 → overlay 显示坐标
+function imgToOverlay(x, y) {
+  return { x: Math.round(x * zoom), y: Math.round(y * zoom) };
+}
+
+// overlay 显示坐标 → 图像原始坐标
+function overlayToImg(x, y) {
+  return { x: Math.round(x / zoom), y: Math.round(y / zoom) };
+}
+
+function getOverlayCoords(e) {
+  // 鼠标相对 overlay 左上角（display 坐标）
+  const cv = document.getElementById('_overlay');
+  if (!cv) return { x: 0, y: 0 };
+  const rect = cv.getBoundingClientRect();
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  const cy = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: Math.round(cx - rect.left), y: Math.round(cy - rect.top) };
+}
+
+// ─── 绘图 ──────────────────────────────────────────
+function drawAllRegions() {
+  const el = document.getElementById('pdfCanvas');
+  if (!el.src || !imgWidth) return;
+
+  // 确保 overlay 尺寸 = 显示尺寸
+  initOverlayAndDraw();
+  const cv = document.getElementById('_overlay');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, cv.width, cv.height);
+
+  // 已有区域：绿色半透明
+  regions.forEach((r, i) => {
+    const p1 = imgToOverlay(r.x1, r.y1);
+    const p2 = imgToOverlay(r.x2, r.y2);
+    const w = p2.x - p1.x, h = p2.y - p1.y;
+    if (w <= 0 || h <= 0) return;
+
+    ctx.strokeStyle = i === selRegionIndex ? '#f9e2af' : '#a6e3a1';
+    ctx.lineWidth = i === selRegionIndex ? 2 : 1.5;
+    ctx.beginPath();
+    ctx.rect(p1.x, p1.y, w, h);
+    ctx.stroke();
+
+    ctx.fillStyle = i === selRegionIndex ? '#f9e2af33' : '#a6e3a122';
+    ctx.fill();
+
+    // 序号标签
+    ctx.fillStyle = i === selRegionIndex ? '#f9e2af' : '#a6e3a1';
+    ctx.fillRect(p1.x, p1.y - 16, 20, 16);
+    ctx.fillStyle = '#1e1e2e';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(i + 1, p1.x + 10, p1.y - 8);
+
+    // 标签文字
+    if (r.label) {
+      ctx.fillStyle = '#cdd6f4';
+      ctx.font = '11px "Microsoft YaHei"';
+      ctx.textAlign = 'left';
+      ctx.fillText(r.label, p1.x, p1.y - 4);
+    }
+  });
+
+  // 绘制中矩形
+  if (drawState) {
+    ctx.strokeStyle = '#89b4fa';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 3]);
+    ctx.beginPath();
+    ctx.rect(
+      Math.min(drawState.sx, drawState.ex),
+      Math.min(drawState.sy, drawState.ey),
+      Math.abs(drawState.ex - drawState.sx),
+      Math.abs(drawState.ey - drawState.sy)
+    );
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+// ─── 鼠标事件 ──────────────────────────────────────
+document.getElementById('imgContainer').addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  e.preventDefault();
+  _hasMoved = false;
+  const {x, y} = getOverlayCoords(e);
+  drawState = { sx: x, sy: y, ex: x, ey: y };
+});
+
+document.getElementById('imgContainer').addEventListener('mousemove', e => {
+  if (!drawState) return;
+  e.preventDefault();
+  _hasMoved = true;
+  const {x, y} = getOverlayCoords(e);
+  drawState.ex = x; drawState.ey = y;
+  drawAllRegions();
+});
+
+document.getElementById('imgContainer').addEventListener('mouseup', e => {
+  if (!drawState) return;
+  e.preventDefault();
+
+  const {x, y} = getOverlayCoords(e);
+  drawState.ex = x; drawState.ey = y;
+
+  if (!_hasMoved) {
+    drawState = null;
+    handleImageClick(e);
+    return;
+  }
+
+  const x1 = Math.min(drawState.sx, drawState.ex);
+  const y1 = Math.min(drawState.sy, drawState.ey);
+  const x2 = Math.max(drawState.sx, drawState.ex);
+  const y2 = Math.max(drawState.sy, drawState.ey);
+  const imgCoord = overlayToImg(x1, y1);
+  const imgCoord2 = overlayToImg(x2, y2);
+  const w = imgCoord2.x - imgCoord.x, h = imgCoord2.y - imgCoord.y;
+
+  drawState = null;
+
+  if (w < 5 || h < 5) { drawAllRegions(); return; }
+
+  regions.push({ index: regions.length + 1, label: '',
+    x1: imgCoord.x, y1: imgCoord.y, x2: imgCoord2.x, y2: imgCoord2.y });
+  selRegionIndex = regions.length - 1;
+  isDirty = true;
+  pageAnnotated = true;
+  updateStatusBar();
+  updateRegionList();
+  drawAllRegions();
+  setTimeout(() => {
+    const input = document.querySelector(`[data-idx="${selRegionIndex}"] .region-label-input`);
+    if (input) input.focus();
+  }, 30);
+});
+
+document.getElementById('imgContainer').addEventListener('mouseleave', e => {
+  if (drawState && _hasMoved) {
+    const imgCoord = overlayToImg(drawState.sx, drawState.sy);
+    const imgCoord2 = overlayToImg(drawState.ex, drawState.ey);
+    const w = imgCoord2.x - imgCoord.x, h = imgCoord2.y - imgCoord.y;
+    if (w >= 5 && h >= 5) {
+      regions.push({ index: regions.length + 1, label: '',
+        x1: imgCoord.x, y1: imgCoord.y, x2: imgCoord2.x, y2: imgCoord2.y });
+      selRegionIndex = regions.length - 1;
+      isDirty = true;
+      pageAnnotated = true;
+      updateRegionList();
+    }
+  }
+  drawState = null;
+  drawAllRegions();
+});
+
+function handleImageClick(e) {
+  const {x, y} = getOverlayCoords(e);
+  let hit = -1;
+  for (let i = 0; i < regions.length; i++) {
+    const r = regions[i];
+    const p1 = imgToOverlay(r.x1, r.y1);
+    const p2 = imgToOverlay(r.x2, r.y2);
+    if (x >= p1.x && x <= p2.x && y >= p1.y && y <= p2.y) {
+      hit = i; break;
+    }
+  }
+  selRegionIndex = hit >= 0 ? hit : -1;
+  updateRegionList();
+  drawAllRegions();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (document.activeElement.tagName === 'INPUT') return;
+    if (selRegionIndex >= 0) {
+      regions.splice(selRegionIndex, 1);
+      reindexRegions();
+      selRegionIndex = -1;
+      isDirty = true;
+      pageAnnotated = regions.length > 0;
+      updateStatusBar();
+      updateRegionList();
+      drawAllRegions();
+    }
+  }
+});
+
+// ─── 区域列表 ─────────────────────────────────────
+function updateRegionList() {
+  const el = document.getElementById('regionList');
+  const pgNum = currentPage; // 用闭包捕获当前页号
+  document.getElementById('regionPageNum').textContent = pgNum;
+  document.getElementById('regionCount').textContent = regions.length;
+
+  if (!regions.length) {
+    el.innerHTML = `<div style="padding:20px;color:#6c7086;font-size:12px;text-align:center;">
+      暂无标注<br><span style="font-size:10px">在左侧画布上绘制矩形框</span>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = regions.map((r, i) => `
+    <div class="region-item ${i === selRegionIndex ? 'sel' : ''}" data-idx="${i}">
+      <div class="region-item-header">
+        <span class="region-num">${i + 1}</span>
+        <input class="region-label-input" type="text" placeholder="字段名称..."
+          value="${escHtml(r.label)}" data-field-idx="${i}" />
+        <button class="region-del" title="删除" data-del-idx="${i}">✕</button>
+      </div>
+      <div class="region-meta">[${r.x1},${r.y1},${r.x2},${r.y2}]</div>
+    </div>
+  `).join('');
+}
+
+// 事件委托：统一处理输入和删除按钮（避免 innerHTML 后事件丢失）
+document.getElementById('regionList').addEventListener('input', e => {
+  const input = e.target;
+  if (!input.classList.contains('region-label-input')) return;
+  const idx = parseInt(input.dataset.fieldIdx);
+  regions[idx].label = input.value;
+  isDirty = true;
+  updateStatusBar();
+  drawAllRegions();
+});
+
+document.getElementById('regionList').addEventListener('click', e => {
+  const btn = e.target.closest('.region-del');
+  if (btn) {
+    const idx = parseInt(btn.dataset.delIdx);
+    deleteRegion(idx);
+    return;
+  }
+  const item = e.target.closest('.region-item');
+  if (item && !e.target.classList.contains('region-label-input')) {
+    const idx = parseInt(item.dataset.idx);
+    selRegionIndex = idx;
+    updateRegionList();
+    drawAllRegions();
+  }
+});
+
+function updateRegionLabel(idx, val) {
+  regions[idx].label = val;
+  isDirty = true;
+  updateStatusBar();
+  drawAllRegions();
+}
+
+function deleteRegion(idx) {
+  regions.splice(idx, 1);
+  reindexRegions();
+  if (selRegionIndex >= regions.length) selRegionIndex = regions.length - 1;
+  isDirty = true;
+  pageAnnotated = regions.length > 0;
+  updateStatusBar();
+  updateRegionList();
+  drawAllRegions();
+}
+
+function reindexRegions() { regions.forEach((r, i) => r.index = i + 1); }
+
+function setPresetLabel(label) {
+  if (selRegionIndex >= 0) {
+    regions[selRegionIndex].label = label;
+    isDirty = true;
+    updateRegionList();
+    drawAllRegions();
+  }
+}
+
+function clearCurrentPage() {
+  if (regions.length && !confirm('确定清空本页所有标注？')) return;
+  regions = [];
+  selRegionIndex = -1;
+  isDirty = true;
+  pageAnnotated = false;
+  updateStatusBar();
+  updateRegionList();
+  drawAllRegions();
+}
+
+// ─── 导航 ─────────────────────────────────────────
+function prevPage() {
+  if (currentPage <= 1) return;
+  loadPage(currentPage - 1);
+}
+function nextPage() {
+  if (currentPage >= totalPages) return;
+  loadPage(currentPage + 1);
+}
+function gotoPage(n) {
+  const p = parseInt(n);
+  if (p < 1 || p > totalPages) return;
+  loadPage(p);
+}
+function updateButtons() {
+  document.getElementById('prevBtn').disabled = currentPage <= 1;
+  document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+  document.getElementById('pageInput').max = totalPages;
+}
+
+// ─── 缩放 ─────────────────────────────────────────
+function zoomCanvas(delta) {
+  zoom = Math.max(0.3, Math.min(3.0, zoom + delta));
+  const el = document.getElementById('pdfCanvas');
+  el.style.width = (imgWidth * zoom) + 'px';
+  el.style.height = (imgHeight * zoom) + 'px';
+  document.getElementById('zoomLabel').textContent = Math.round(zoom * 100) + '%';
+  const cv = document.getElementById('_overlay');
+  if (cv) { cv.remove(); }
+  drawAllRegions();
+}
+
+// ─── 保存 & 导出 ──────────────────────────────────
+async function saveCurrentPage() {
+  const payload = { page: currentPage, regions: regions.map(r => ({...r})) };
+  const r = await fetch(`${API_BASE}/template/${currentTemplate}/page/${currentPage}/regions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!r.ok) { alert('保存失败: ' + await r.text()); return; }
+  const res = await r.json();
+  isDirty = false;
+  updateStatusBar();
+  document.getElementById('infoProgress').textContent = `✅ 第${currentPage}页已保存 (${res.regions_count}个区域)`;
+  setTimeout(() => document.getElementById('infoProgress').textContent = '', 3000);
+}
+
+async function showExport() {
+  const r = await fetch(`${API_BASE}/export`);
+  if (!r.ok) { alert('导出失败'); return; }
+  const d = await r.json();
+  document.getElementById('exportPreview').textContent = JSON.stringify(d, null, 2);
+  document.getElementById('exportModal').classList.add('show');
+  window._exportData = d;
+}
+
+function downloadJson() {
+  if (!window._exportData) return;
+  const blob = new Blob([JSON.stringify(window._exportData, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${currentTemplate}_regions.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('exportModal').addEventListener('click', e => {
+  if (e.target.id === 'exportModal') e.target.classList.remove('show');
+});
+
+// ─── 工具 ─────────────────────────────────────────
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── 初始化 ───────────────────────────────────────
+// DOMContentLoaded 确保 DOM 完全解析后再执行
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "template": "PDFtemplates",
+  "page": 21,
+  "dpi": 150,
+  "regions": [
+    {
+      "index": 1,
+      "label": "第21页特征区域",
+      "x1": 119,
+      "y1": 1598,
+      "x2": 279,
+      "y2": 1676,
+      "page": 21
+    }
+  ]
+}

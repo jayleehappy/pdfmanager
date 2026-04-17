@@ -1,0 +1,22 @@
+{
+  "model": "PP-OCRv5_server_rec (TextRecognition)",
+  "device": "cpu",
+  "test_image": "D:\\grsxbd\\templates\\pages\\page_005.png",
+  "image_size": [
+    1241,
+    1754
+  ],
+  "pp5_load_time_s": 1.9,
+  "pp5_rec_time_s": 1.54,
+  "pp5_fullpage_text": [
+    {
+      "text": "ybjishou@easmoneom",
+      "score": 0.6610190868377686
+    }
+  ],
+  "paddleocrjson_summary": {
+    "total_regions": 54,
+    "readable": 54,
+    "garbled": 0
+  }
+}

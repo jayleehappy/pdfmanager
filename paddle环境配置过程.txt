@@ -1,0 +1,184 @@
+# 创建虚拟环境
+python -m venv .venv_paddleocr
+# 激活环境
+.\.venv_paddleocr\Scripts\Activate.ps1
+
+python -m pip install paddlepaddle==3.3.1 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+
+python -m pip install -U "paddleocr[doc-parser]"
+
+测试
+paddleocr doc_parser -i ./paddleocr_vl_demo.png --device cpu
+
+测试结果：
+(.venv_paddleocr) PS C:\Users\jay> paddleocr doc_parser -i ./paddleocr_vl_demo.png --device cpu
+Checking connectivity to the model hosters, this may take a while. To bypass this check, set `PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK` to `True`.
+Creating model: ('PP-DocLayoutV3', None)
+Model files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\jay\.paddlex\official_models\PP-DocLayoutV3`.
+信息: 用提供的模式无法找到文件。
+C:\Users\jay\.venv_paddleocr\Lib\site-packages\paddle\utils\cpp_extension\extension_utils.py:712: UserWarning: No ccache found. Please be aware that recompiling all source files may be required. You can download and install ccache from: https://github.com/ccache/ccache/blob/master/doc/INSTALL.md
+  warnings.warn(warning_message)
+Creating model: ('PaddleOCR-VL-1.5-0.9B', None)
+Model files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\jay\.paddlex\official_models\PaddleOCR-VL-1.5`.
+Loading configuration file C:\Users\jay\.paddlex\official_models\PaddleOCR-VL-1.5\config.json
+Loading weights file C:\Users\jay\.paddlex\official_models\PaddleOCR-VL-1.5\model.safetensors
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+use GQA - num_heads: 16- num_key_value_heads: 2
+Loaded weights file from disk, setting weights to model.
+All model checkpoint weights were used when initializing PaddleOCRVLForConditionalGeneration.
+
+All the weights of PaddleOCRVLForConditionalGeneration were initialized from the model checkpoint at C:\Users\jay\.paddlex\official_models\PaddleOCR-VL-1.5.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use PaddleOCRVLForConditionalGeneration for predictions without further training.
+Loading configuration file C:\Users\jay\.paddlex\official_models\PaddleOCR-VL-1.5\generation_config.json
+C:\Users\jay\.venv_paddleocr\Lib\site-packages\paddle\tensor\creation.py:1152: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach(), rather than paddle.to_tensor(sourceTensor).
+  return tensor(
+[2026/04/13 18:29:16] paddleocr INFO: Processed item 0 in 42110.273122787476 ms
+{'res': {'input_path': './paddleocr_vl_demo.png', 'page_index': None, 'page_count': None, 'width': 1024, 'height': 1536, 'model_settings': {'use_doc_preprocessor': False, 'use_layout_detection': True, 'use_chart_recognition': False, 'use_seal_recognition': False, 'use_ocr_for_image_block': False, 'format_block_content': False, 'merge_layout_blocks': True, 'markdown_ignore_labels': ['number', 'footnote', 'header', 'header_image', 'footer', 'footer_image', 'aside_text'], 'return_layout_polygon_points': True}, 'layout_det_res': {'input_path': None, 'page_index': None, 'boxes': [{'cls_id': 22, 'label': 'text', 'score': 0.4010447859764099, 'coordinate': [257, 531, 758, 610], 'order': 1, 'polygon_points': array([[257., 531.],
+       [758., 531.],
+       [758., 610.],
+       [257., 610.]], dtype=float32)}, {'cls_id': 22, 'label': 'text', 'score': 0.6080440282821655, 'coordinate': [195, 649, 828, 723], 'order': 2, 'polygon_points': array([[195., 649.],
+       [828., 649.],
+       [828., 723.],
+       [195., 723.]], dtype=float32)}, {'cls_id': 22, 'label': 'text', 'score': 0.7183375358581543, 'coordinate': [225, 763, 799, 839], 'order': 3, 'polygon_points': array([[225., 763.],
+       [799., 763.],
+       [799., 839.],
+       [225., 839.]], dtype=float32)}, {'cls_id': 22, 'label': 'text', 'score': 0.7169532179832458, 'coordinate': [226, 878, 796, 952], 'order': 4, 'polygon_points': array([[226., 878.],
+       [796., 878.],
+       [796., 952.],
+       [226., 952.]], dtype=float32)}]}, 'parsing_res_list': [{'block_label': 'text', 'block_content': '操场背后的意义', 'block_bbox': [257, 531, 758, 610]}, {'block_label': 'text', 'block_content': '一个操场，承载的是', 'block_bbox': [195, 649, 828, 723]}, {'block_label': 'text', 'block_content': '孩子们的快乐童年', 'block_bbox': [225, 763, 799, 839]}, {'block_label': 'text', 'block_content': '运动让身心更健康', 'block_bbox': [226, 878, 796, 952]}]}}
+(.venv_paddleocr) PS C:\Users\jay>
+
+
+
+备注：官方文档路径为："D:\Download\www_paddleocr_ai_latest_version3_x_pipeline_usage_PaddleOCR_.pdf"
+
+摘抄：
+Python脚本方式集成¶
+命令行方式是为了快速体验查看效果，一般来说，在项目中，往往需要通过代码集成，您可以通过几行代码即可完成 PaddleOCR-VL 的快速推理，推理代码如下：
+from paddleocr import PaddleOCRVL
+
+# 英伟达 GPU
+pipeline = PaddleOCRVL()
+# 昆仑芯 XPU
+# pipeline = PaddleOCRVL(device="xpu")
+# 海光 DCU
+# pipeline = PaddleOCRVL(device="dcu")
+# 沐曦 GPU
+# pipeline = PaddleOCRVL(device="metax_gpu")
+# Apple Silicon
+# pipeline = PaddleOCRVL(device="cpu")
+# 华为昇腾 NPU 
+# 华为昇腾 NPU 请参考第 3 章节使用 PaddlePaddle + vLLM 的方式进行推理
+
+# pipeline = PaddleOCRVL(use_doc_orientation_classify=True) # 通过 use_doc_orientation_classify 指定是否使用文档方向分类模型
+# pipeline = PaddleOCRVL(use_doc_unwarping=True) # 通过 use_doc_unwarping 指定是否使用文本图像矫正模块
+# pipeline = PaddleOCRVL(use_layout_detection=False) # 通过 use_layout_detection 指定是否使用版面区域检测排序模块
+
+output = pipeline.predict("./paddleocr_vl_demo.png")
+for res in output:
+    res.print() ## 打印预测的结构化输出
+    res.save_to_json(save_path="output") ## 保存当前图像的结构化json结果
+    res.save_to_markdown(save_path="output") ## 保存当前图像的markdown格式的结果
+
+
+
+如果是 PDF 文件，会将 PDF 的每一页单独处理，每一页的 Markdown 文件也会对应单独的结果。如果您希望对多页的推理结果进行跨页表格合并、重建多级标题和合并多页结果等需求，可以通过如下方式实现：
+
+from paddleocr import PaddleOCRVL
+
+input_file = "./your_pdf_file.pdf"
+output_path = Path("./output")
+
+pipeline = PaddleOCRVL()
+
+output = pipeline.predict(input=input_file)
+
+pages_res = list(output)
+
+output = pipeline.restructure_pages(pages_res)
+
+# output = pipeline.restructure_pages(pages_res, merge_tables=True) # 合并跨页表格
+# output = pipeline.restructure_pages(pages_res, merge_tables=True, relevel_titles=True) # 合并跨页表格，重建多级标题
+# output = pipeline.restructure_pages(pages_res, merge_tables=True, relevel_titles=True, concatenate_pages=True) # 合并跨页表格，重建多级标题，合并多页结果为一页
+
+for res in output:
+    res.print() ## 打印预测的结构化输出
+    res.save_to_json(save_path="output") ## 保存当前图像的结构化json结果
+    res.save_to_markdown(save_path="output") ## 保存当前图像的markdown格式的结果
+
+
+如果您需要处理多个文件，建议将包含文件的目录路径，或者文件路径列表传入 predict 方法，以最大化处理效率。例如：
+
+# `imgs` 目录中包含多张待处理图像：file1.png、file2.png、file3.png
+# 传入目录路径
+output = pipeline.predict("imgs")
+# 或者传入文件路径列表
+output = pipeline.predict(["imgs/file1.png", "imgs/file2.png", "imgs/file3.png"])
+# 以上两种方式的处理效率高于下列方式：
+# for file in ["imgs/file1.png", "imgs/file2.png", "imgs/file3.png"]:
+#     output = pipeline.predict(file)
+
+
+注：
+
+在示例代码中，use_doc_orientation_classify、use_doc_unwarping 参数默认均设置为 False，分别表示关闭文档方向分类、文本图像矫正功能，如果需要使用这些功能，可以手动设置为 True。
+
+客户端使用方法¶
+启动 VLM 推理服务后，客户端即可通过 PaddleOCR 调用该服务。请注意，由于客户端需要调用版面检测模型，仍建议在 GPU 等加速设备上运行客户端，以获得更稳定和高效的性能。客户端环境配置请参考第 1 节，3.1 节介绍的环境配置仅适用于启动服务，不适用于客户端。
+3.2.1 CLI 调用¶
+可通过 --vl_rec_backend 指定后端类型（vllm-server、sglang-server、fastdeploy-server、mlx-vlm-server 或 llama-cpp-server），通过 --vl_rec_server_url 指定服务地址，例如：
+paddleocr doc_parser --input paddleocr_vl_demo.png --vl_rec_backend vllm-server --vl_rec_server_url http://localhost:8118/v1
+
+此外，可通过 --vl_rec_api_model_name 指定服务使用的模型名称，--vl_rec_api_key 指定鉴权使用的 API key。示例如下：
+
+使用通过 vllm serve 默认参数启动的服务：
+paddleocr doc_parser \
+    --input paddleocr_vl_demo.png \
+    --vl_rec_backend vllm-server \
+    --vl_rec_server_url http://localhost:8000/v1 \
+    --vl_rec_api_model_name 'PaddlePaddle/PaddleOCR-VL-1.5'
+
+    3.2.2 Python API 调用¶
+创建 PaddleOCRVL 对象时传入 vl_rec_backend 指定后端类型（vllm-server、sglang-server、fastdeploy-server、mlx-vlm-server 或 llama-cpp-server）， vl_rec_server_url 指定服务地址，例如：
+
+pipeline = PaddleOCRVL(vl_rec_backend="vllm-server", vl_rec_server_url="http://localhost:8118/v1")
+
+此外，可通过 vl_rec_api_model_name 指定服务使用的模型名称，vl_rec_api_key 指定鉴权使用的 API key。
+
+使用通过 vllm serve 默认参数启动的服务：
+
+pipeline = PaddleOCRVL(
+    vl_rec_backend="vllm-server",
+    vl_rec_server_url="http://localhost:8000/v1",
+    vl_rec_api_model_name="PaddlePaddle/PaddleOCR-VL-1.5",
+)
+3.3 性能调优¶
+默认配置无法保证在所有环境中取得最优性能。如果用户在实际使用中遇到性能问题，可以尝试以下优化方法。
+
+3.3.1 服务端参数调整¶
+不同推理加速框架支持的参数不同，可参考各自官方文档了解可用参数及其调整时机：
+
+vLLM 官方参数调优指南
+SGLang 超参数调整文档
+FastDeploy 最佳实践文档
+PaddleOCR VLM 推理服务支持通过配置文件进行调参。以下示例展示如何调整 vLLM 服务器的 gpu-memory-utilization 和 max-num-seqs 参数：
+
+创建 YAML 文件 vllm_config.yaml，内容如下：
+gpu-memory-utilization: 0.3
+max-num-seqs: 128
